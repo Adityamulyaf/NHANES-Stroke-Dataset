@@ -1,16 +1,16 @@
-Skenario,Model,Accuracy,Precision,Recall,F1,AUC-ROC
-A: Klinis saja,Decision Tree,0.7868,0.0539,0.3143,0.0921,0.6789
-A: Klinis saja,Random Forest,0.8487,0.0719,0.2857,0.1149,0.7421
-A: Klinis saja,XGBoost,0.9028,0.0676,0.1429,0.0917,0.6961
-B: Klinis + Tidur,Decision Tree,0.7957,0.0609,0.3429,0.1034,0.7119
-B: Klinis + Tidur,Random Forest,0.8959,0.092,0.2286,0.1311,0.7585
-B: Klinis + Tidur,XGBoost,0.9224,0.0769,0.1143,0.092,0.7375
-C: Klinis + Stres,Decision Tree,0.7947,0.0735,0.4286,0.1255,0.6936
-C: Klinis + Stres,Random Forest,0.8782,0.0594,0.1714,0.0882,0.7453
-C: Klinis + Stres,XGBoost,0.9263,0.1154,0.1714,0.1379,0.7361
-D: Klinis + Aktivitas,Decision Tree,0.7721,0.0661,0.4286,0.1145,0.6692
-D: Klinis + Aktivitas,Random Forest,0.8654,0.082,0.2857,0.1274,0.7734
-D: Klinis + Aktivitas,XGBoost,0.9263,0.1,0.1429,0.1176,0.7007
-E: Klinis + Semua Gaya Hidup,Decision Tree,0.8016,0.0628,0.3429,0.1062,0.6751
-E: Klinis + Semua Gaya Hidup,Random Forest,0.9057,0.0822,0.1714,0.1111,0.7819
-E: Klinis + Semua Gaya Hidup,XGBoost,0.9303,0.1087,0.1429,0.1235,0.7591
+Skenario,Model,Threshold,Accuracy (Default),Precision (Default),Recall (Default),F1 (Default),Accuracy (Tuned),Precision (Tuned),Recall (Tuned),F1 (Tuned),AUC-ROC
+A: Klinis saja,Decision Tree,0.25,0.7868,0.0539,0.3143,0.0921,0.6601,0.0716,0.7429,0.1307,0.6789
+A: Klinis saja,Random Forest,0.1843,0.8487,0.0719,0.2857,0.1149,0.613,0.0736,0.8857,0.136,0.7421
+A: Klinis saja,XGBoost,0.0232,0.9028,0.0676,0.1429,0.0917,0.5599,0.0597,0.8,0.1111,0.6961
+B: Klinis + Tidur,Decision Tree,0.1684,0.7957,0.0609,0.3429,0.1034,0.7122,0.0784,0.6857,0.1408,0.7119
+B: Klinis + Tidur,Random Forest,0.175,0.8959,0.092,0.2286,0.1311,0.6022,0.0718,0.8857,0.1328,0.7585
+B: Klinis + Tidur,XGBoost,0.0475,0.9224,0.0769,0.1143,0.092,0.7102,0.0806,0.7143,0.1449,0.7375
+C: Klinis + Stres,Decision Tree,0.3143,0.7947,0.0735,0.4286,0.1255,0.7701,0.0871,0.6,0.1522,0.6936
+C: Klinis + Stres,Random Forest,0.1769,0.8782,0.0594,0.1714,0.0882,0.6041,0.0701,0.8571,0.1296,0.7453
+C: Klinis + Stres,XGBoost,0.014,0.9263,0.1154,0.1714,0.1379,0.5344,0.0619,0.8857,0.1157,0.7361
+D: Klinis + Aktivitas,Decision Tree,0.0211,0.7721,0.0661,0.4286,0.1145,0.5196,0.0584,0.8571,0.1093,0.6692
+D: Klinis + Aktivitas,Random Forest,0.2091,0.8654,0.082,0.2857,0.1274,0.6385,0.0785,0.8857,0.1442,0.7734
+D: Klinis + Aktivitas,XGBoost,0.0088,0.9263,0.1,0.1429,0.1176,0.4578,0.0535,0.8857,0.101,0.7007
+E: Klinis + Semua Gaya Hidup,Decision Tree,0.0513,0.8016,0.0628,0.3429,0.1062,0.5334,0.0565,0.8,0.1055,0.6751
+E: Klinis + Semua Gaya Hidup,Random Forest,0.2344,0.9057,0.0822,0.1714,0.1111,0.7073,0.0852,0.7714,0.1534,0.7819
+E: Klinis + Semua Gaya Hidup,XGBoost,0.0152,0.9303,0.1087,0.1429,0.1235,0.6159,0.068,0.8,0.1253,0.7591

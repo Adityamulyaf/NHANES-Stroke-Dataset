@@ -60,31 +60,32 @@ Pada klasifikasi dengan ketidakseimbangan kelas tinggi (*imbalanced data*), metr
 
 ## 3. Hasil Eksperimen & Analisis Training
 
-Eksperimen dilakukan dengan melatih ketiga model pada 5 skenario kombinasi fitur, menghasilkan metrik sebagai berikut:
+Eksperimen dilakukan dengan melatih ketiga model pada 5 skenario kombinasi fitur. Kami membandingkan performa model menggunakan **ambang batas default (`0.50`)** dan **ambang batas optimal (Tuned)** yang dipilih menggunakan **Youden's J-Statistic** pada kurva ROC:
 
-| Skenario | Model | Accuracy | Precision | Recall | F1-Score | AUC-ROC |
-|---|---|---|---|---|---|---|
-| **A: Klinis saja (Baseline)** | Decision Tree | 0.7868 | 0.0539 | 0.3143 | 0.0921 | 0.6789 |
-| | Random Forest | 0.8487 | 0.0719 | 0.2857 | 0.1149 | 0.7421 |
-| | XGBoost | 0.9028 | 0.0676 | 0.1429 | 0.0917 | 0.6961 |
-| **B: Klinis + Tidur** | Decision Tree | 0.7957 | 0.0609 | 0.3429 | 0.1034 | 0.7119 |
-| | Random Forest | 0.8959 | 0.0920 | 0.2286 | 0.1311 | 0.7585 |
-| | XGBoost | 0.9224 | 0.0769 | 0.1143 | 0.0920 | 0.7375 |
-| **C: Klinis + Stres** | Decision Tree | 0.7947 | 0.0735 | 0.4286 | 0.1255 | 0.6936 |
-| | Random Forest | 0.8782 | 0.0594 | 0.1714 | 0.0882 | 0.7453 |
-| | XGBoost | 0.9263 | 0.1154 | 0.1714 | 0.1379 | 0.7361 |
-| **D: Klinis + Aktivitas** | Decision Tree | 0.7721 | 0.0661 | 0.4286 | 0.1145 | 0.6692 |
-| | Random Forest | 0.8654 | 0.0820 | 0.2857 | 0.1274 | 0.7734 |
-| | XGBoost | 0.9263 | 0.1000 | 0.1429 | 0.1176 | 0.7007 |
-| **E: Klinis + Semua Gaya Hidup** | Decision Tree | 0.8016 | 0.0628 | 0.3429 | 0.1062 | 0.6751 |
-| | **Random Forest (Best)** | **0.9057** | **0.0822** | **0.1714** | **0.1111** | **0.7819** |
-| | XGBoost | 0.9303 | 0.1087 | 0.1429 | 0.1235 | 0.7591 |
+| Skenario | Model | Threshold | Acc (Def) | Prec (Def) | Rec (Def) | F1 (Def) | Acc (Tuned) | Prec (Tuned) | Rec (Tuned) | F1 (Tuned) | AUC-ROC |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **A: Klinis saja** | Decision Tree | 0.2500 | 0.7868 | 0.0539 | 0.3143 | 0.0921 | 0.6601 | 0.0716 | 0.7429 | 0.1307 | 0.6789 |
+| | Random Forest | 0.1843 | 0.8487 | 0.0719 | 0.2857 | 0.1149 | 0.6130 | 0.0736 | 0.8857 | 0.1360 | 0.7421 |
+| | XGBoost | 0.0232 | 0.9028 | 0.0676 | 0.1429 | 0.0917 | 0.5599 | 0.0597 | 0.8000 | 0.1111 | 0.6961 |
+| **B: Klinis + Tidur** | Decision Tree | 0.1684 | 0.7957 | 0.0609 | 0.3429 | 0.1034 | 0.7122 | 0.0784 | 0.6857 | 0.1408 | 0.7119 |
+| | Random Forest | 0.1750 | 0.8959 | 0.0920 | 0.2286 | 0.1311 | 0.6022 | 0.0718 | 0.8857 | 0.1328 | 0.7585 |
+| | XGBoost | 0.0475 | 0.9224 | 0.0769 | 0.1143 | 0.0920 | 0.7102 | 0.0806 | 0.7143 | 0.1449 | 0.7375 |
+| **C: Klinis + Stres** | Decision Tree | 0.3143 | 0.7947 | 0.0735 | 0.4286 | 0.1255 | 0.7701 | 0.0871 | 0.6000 | 0.1522 | 0.6936 |
+| | Random Forest | 0.1769 | 0.8782 | 0.0594 | 0.1714 | 0.0882 | 0.6041 | 0.0701 | 0.8571 | 0.1296 | 0.7453 |
+| | XGBoost | 0.0140 | 0.9263 | 0.1154 | 0.1714 | 0.1379 | 0.5344 | 0.0619 | 0.8857 | 0.1157 | 0.7361 |
+| **D: Klinis + Aktivitas** | Decision Tree | 0.0211 | 0.7721 | 0.0661 | 0.4286 | 0.1145 | 0.5196 | 0.0584 | 0.8571 | 0.1093 | 0.6692 |
+| | Random Forest | 0.2091 | 0.8654 | 0.0820 | 0.2857 | 0.1274 | 0.6385 | 0.0785 | 0.8857 | 0.1442 | 0.7734 |
+| | XGBoost | 0.0088 | 0.9263 | 0.1000 | 0.1429 | 0.1176 | 0.4578 | 0.0535 | 0.8857 | 0.1010 | 0.7007 |
+| **E: Klinis + Semua Gaya Hidup** | Decision Tree | 0.0513 | 0.8016 | 0.0628 | 0.3429 | 0.1062 | 0.5334 | 0.0565 | 0.8000 | 0.1055 | 0.6751 |
+| | **Random Forest (Best)** | **0.2344** | **0.9057** | **0.0822** | **0.1714** | **0.1111** | **0.7073** | **0.0852** | **0.7714** | **0.1534** | **0.7819** |
+| | XGBoost | 0.0152 | 0.9303 | 0.1087 | 0.1429 | 0.1235 | 0.6159 | 0.0680 | 0.8000 | 0.1253 | 0.7591 |
 
 ### Kontekstualisasi Arti Metrik pada Hasil Eksperimen (Model Terbaik: Random Forest Skenario E)
-* **Accuracy (0.9057 / 90.57%)**: Artinya model berhasil memprediksi secara benar status stroke maupun sehat pada 90.57% pasien di dataset test. Nilai ini sangat tinggi namun dipengaruhi oleh tebakan kelas mayoritas (pasien tidak stroke).
-* **Precision (0.0822 / 8.22%)**: Dari seluruh pasien yang diprediksi mengalami risiko stroke oleh Random Forest, hanya 8.22% yang secara medis terbukti stroke pada data aktual. Nilai ini tergolong rendah karena kejadian stroke memang sangat langka di populasi (~3.6%), namun performa ini jauh lebih baik dibanding model menebak secara acak.
-* **Recall (0.1714 / 17.14%)**: Model mampu mendeteksi 17.14% dari total penderita stroke yang sebenarnya ada di data uji. Nilai ini merepresentasikan *trade-off* model agar menjaga sensitivitas deteksi dini tanpa membuat terlalu banyak salah prediksi (*false positive*).
-* **AUC-ROC (0.7819 / 78.19%)**: Metrik utama performa stabil. Menunjukkan tingkat kemampuan model dalam membedakan orang yang berisiko stroke vs orang sehat sebesar 78.19%. Angka di atas 0.75 dianggap solid untuk data klinis yang sangat tidak seimbang.
+* **Threshold (0.2344)**: Menunjukkan ambang batas probabilitas optimal. Jika pasien memiliki probabilitas risiko stroke $\ge 23.44\%$, model mengklasifikasikannya sebagai berisiko tinggi stroke. Penurunan dari threshold default 0.50 ini sangat esensial karena karakteristik dataset NHANES yang merupakan survei perwakilan populasi umum (non-klinis), di mana sebagian besar responden adalah orang sehat sehingga kasus positif stroke sangat langka dan tersebar sangat jarang di dalam dataset (hanya ~3.6% dari total data).
+* **Accuracy (Default: 90.57% vs Tuned: 70.73%)**: Pada threshold 0.50, akurasi tinggi didominasi oleh tebakan kelas mayoritas (pasien sehat). Ketika threshold diturunkan ke 0.2344, akurasi turun ke 70.73% karena model mendeteksi lebih agresif (banyak prediksi positif), yang merupakan *trade-off* umum dalam tes penapisan medis (*screening*).
+* **Precision (Default: 8.22% vs Tuned: 8.52%)**: Nilai presisi relatif stabil dan sedikit meningkat. Dari semua pasien yang diprediksi stroke pada threshold optimal, 8.52% di antaranya benar-benar terbukti stroke di data aktual (meningkat lebih dari **2.3 kali lipat** dibanding tebakan acak populasi umum yang hanya 3.6%).
+* **Recall (Default: 17.14% vs Tuned: 77.14%)**: **Peningkatan krusial!** Menggunakan threshold bawaan, model melewatkan 82.86% pasien stroke. Dengan penalaan threshold optimal, model kini berhasil mengidentifikasi **77.14%** dari total penderita stroke yang ada di data uji.
+* **F1-Score (Default: 11.11% vs Tuned: 15.34%)**: Keseimbangan performa model meningkat signifikan seiring naiknya *Recall* tanpa merusak *Precision*.
 
 ### Visualisasi Hasil Eksperimen & Interpretasinya
 
