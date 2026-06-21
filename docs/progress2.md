@@ -90,15 +90,15 @@ Eksperimen dilakukan dengan melatih ketiga model pada 5 skenario kombinasi fitur
 ### Visualisasi Hasil Eksperimen & Interpretasinya
 
 #### Perbandingan AUC-ROC per Skenario & Model
-![Perbandingan AUC-ROC per Skenario](../output_images/auc_comparison.png)
+![Perbandingan AUC-ROC per Skenario](../reports/figures/auc_comparison.png)
 Diagram batang ini memvisualisasikan performa AUC-ROC dari tiga model pada kelima skenario eksperimen. Terlihat jelas bahwa **Random Forest** mendominasi performa terbaik di hampir seluruh skenario, dan performanya terus meningkat secara linier seiring penambahan fitur gaya hidup.
 
 #### Heatmap AUC-ROC Semua Kombinasi
-![Heatmap AUC-ROC Semua Kombinasi](../output_images/heatmap_auc.png)
+![Heatmap AUC-ROC Semua Kombinasi](../reports/figures/heatmap_auc.png)
 Representasi warna matriks AUC-ROC untuk memudahkan perbandingan nilai numerik secara instan. Warna biru yang semakin pekat menunjukkan performa model yang semakin baik. Area terpekat berada pada kolom **Random Forest** di baris **Skenario E** (0.7819).
 
 #### Kurva ROC Skenario E
-![ROC Curve Skenario E](../output_images/roc_curve_scenario_E.png)
+![ROC Curve Skenario E](../reports/figures/roc_curve_scenario_E.png)
 Kurva ini memplot rasio True Positive (Recall) terhadap False Positive pada berbagai threshold. Garis putus-putus diagonal mewakili tebakan acak (AUC = 0.50). Semakin melengkung kurva mendekati sudut kiri atas, performanya semakin optimal. Kurva **Random Forest** berada paling atas dengan cakupan area terluas (AUC = 0.7819).
 
 ### Analisis Utama Performa Model:
@@ -124,16 +124,16 @@ Berdasarkan analisis nilai SHAP (*SHapley Additive exPlanations*) pada model Ran
 ### Visualisasi Analisis SHAP & Interpretasinya
 
 #### SHAP Global Feature Importance
-![SHAP Global Feature Importance](../output_images/shap_summary_bar.png)
+![SHAP Global Feature Importance](../reports/figures/shap_summary_bar.png)
 Diagram batang ini mengurutkan 20 fitur paling berpengaruh berdasarkan nilai rata-rata absolut SHAP harian. Fitur dengan bar terpanjang (seperti usia/*age*, riwayat penyakit jantung, *bmi*, dan tekanan darah) memiliki dampak paling kuat dalam menentukan probabilitas risiko stroke.
 
 #### SHAP Beeswarm Plot
-![SHAP Beeswarm Plot](../output_images/shap_beeswarm.png)
+![SHAP Beeswarm Plot](../reports/figures/shap_beeswarm.png)
 Beeswarm plot menunjukkan kontribusi nilai tinggi/rendah suatu fitur terhadap prediksi.
   * **Warna Merah** = Nilai fitur tinggi; **Warna Biru** = Nilai fitur rendah.
   * **Titik di kanan garis tengah (SHAP > 0)** = Meningkatkan risiko stroke; **Titik di kiri (SHAP < 0)** = Menurunkan risiko.
   * *Contoh*: Titik merah pada fitur `age`, `systolic_bp`, dan `bmi` berada di sisi kanan, menunjukkan bahwa pertambahan usia, naiknya tekanan darah sistolik, dan naiknya BMI meningkatkan risiko stroke secara signifikan.
 
 #### Kontribusi Kelompok Fitur
-![Kontribusi Kelompok Fitur](../output_images/shap_groups.png)
+![Kontribusi Kelompok Fitur](../reports/figures/shap_groups.png)
 Barplot horizontal ini membandingkan kontribusi kumulatif dari 4 kelompok fitur berdasarkan nilai rata-rata SHAP. Kelompok **Klinis** memegang peran utama (0.3204), disusul secara ketat oleh kelompok gaya hidup **Tidur** (0.0782) dan **Aktivitas Fisik** (0.0728), sementara kelompok **Stres** (0.0409) memiliki kontribusi terkecil namun tetap memberikan dampak positif dalam penyempurnaan akurasi prediksi model.

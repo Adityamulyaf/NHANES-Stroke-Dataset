@@ -1,6 +1,7 @@
 # !pip install imbalanced-learn xgboost shap joblib -q
 
 import os
+from pathlib import Path
 import joblib
 import pandas as pd
 import numpy as np
@@ -24,15 +25,21 @@ plt.rcParams['font.family'] = 'DejaVu Sans'
 COLORS = ['#2C3E93', '#F5A623', '#10B981', '#E74C3C', '#8B5CF6']
 
 # Buat folder untuk gambar output
-os.makedirs('output_images', exist_ok=True)
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / 'data'
+FIGURES_DIR = BASE_DIR / 'reports' / 'figures'
+TABLES_DIR = BASE_DIR / 'reports' / 'tables'
+
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+TABLES_DIR.mkdir(parents=True, exist_ok=True)
 
 print('Semua library berhasil diimport')
 # Load preprocessed datasets
-train_df = pd.read_csv('nhanes_train_scaled.csv')
-test_df = pd.read_csv('nhanes_test_scaled.csv')
+train_df = pd.read_csv(DATA_DIR / 'nhanes_train_scaled.csv')
+test_df = pd.read_csv(DATA_DIR / 'nhanes_test_scaled.csv')
 
 # Load feature groups
-feature_groups = joblib.load('feature_groups.pkl')
+feature_groups = joblib.load(DATA_DIR / 'feature_groups.pkl')
 CLINICAL = feature_groups['CLINICAL']
 SLEEP = feature_groups['SLEEP']
 STRESS = feature_groups['STRESS']
@@ -172,18 +179,21 @@ trained_models['best'] = best
 
 print('\nSemua eksperimen selesai')
 print('TABEL HASIL SEMUA EKSPERIMEN (DEFAULT VS TUNED)')
-try: display(results_df.style
-    .highlight_max(subset=['Accuracy (Default)', 'Precision (Default)', 'Recall (Default)', 'F1 (Default)',
-                           'Accuracy (Tuned)', 'Precision (Tuned)', 'Recall (Tuned)', 'F1 (Tuned)', 'AUC-ROC'],
-                   color='#d4edda')
-    .format({
-        'Threshold': '{:.4f}',
-        'Accuracy (Default)': '{:.4f}', 'Precision (Default)': '{:.4f}', 'Recall (Default)': '{:.4f}', 'F1 (Default)': '{:.4f}',
-        'Accuracy (Tuned)': '{:.4f}', 'Precision (Tuned)': '{:.4f}', 'Recall (Tuned)': '{:.4f}', 'F1 (Tuned)': '{:.4f}',
-        'AUC-ROC': '{:.4f}'
-    })
-    .set_properties(**{'font-size': '11pt'})
-)
+try:
+    display(results_df.style
+        .highlight_max(subset=['Accuracy (Default)', 'Precision (Default)', 'Recall (Default)', 'F1 (Default)',
+                               'Accuracy (Tuned)', 'Precision (Tuned)', 'Recall (Tuned)', 'F1 (Tuned)', 'AUC-ROC'],
+                       color='#d4edda')
+        .format({
+            'Threshold': '{:.4f}',
+            'Accuracy (Default)': '{:.4f}', 'Precision (Default)': '{:.4f}', 'Recall (Default)': '{:.4f}', 'F1 (Default)': '{:.4f}',
+            'Accuracy (Tuned)': '{:.4f}', 'Precision (Tuned)': '{:.4f}', 'Recall (Tuned)': '{:.4f}', 'F1 (Tuned)': '{:.4f}',
+            'AUC-ROC': '{:.4f}'
+        })
+        .set_properties(**{'font-size': '11pt'})
+    )
+except NameError:
+    print(results_df)
 plt.figure(figsize=(10, 6))
 sns.barplot(x='Skenario', y='AUC-ROC', hue='Model', data=results_df, palette=COLORS[:3])
 plt.title('Perbandingan AUC-ROC antar Skenario dan Model', fontsize=12, fontweight='bold')
@@ -194,9 +204,9 @@ plt.grid(axis='y', alpha=0.3)
 plt.xticks(rotation=15, ha='right')
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
-plt.savefig('output_images/auc_comparison.png', dpi=150, bbox_inches='tight')
+plt.savefig(FIGURES_DIR / 'auc_comparison.png', dpi=150, bbox_inches='tight')
 plt.show()
-print('Chart tersimpan di output_images/auc_comparison.png')
+print(f'Chart tersimpan di {FIGURES_DIR / "auc_comparison.png"}')
 plt.figure(figsize=(8, 6))
 pivot_df = results_df.pivot(index='Skenario', columns='Model', values='AUC-ROC')
 pivot_df = pivot_df.reindex(list(SCENARIOS.keys()))
@@ -205,9 +215,9 @@ plt.title('Heatmap AUC-ROC untuk Setiap Skenario dan Model', fontsize=12, fontwe
 plt.xlabel('Model Classifier', fontsize=10)
 plt.ylabel('Skenario Eksperimen', fontsize=10)
 plt.tight_layout()
-plt.savefig('output_images/heatmap_auc.png', dpi=150, bbox_inches='tight')
+plt.savefig(FIGURES_DIR / 'heatmap_auc.png', dpi=150, bbox_inches='tight')
 plt.show()
-print('Heatmap tersimpan di output_images/heatmap_auc.png')
+print(f'Heatmap tersimpan di {FIGURES_DIR / "heatmap_auc.png"}')
 fig, ax = plt.subplots(figsize=(7, 6))
 
 for mname, color in zip(MODELS.keys(), COLORS[:3]):
@@ -232,9 +242,9 @@ ax.set_title('ROC Curve - Skenario E (Klinis + Semua Gaya Hidup)', fontsize=12, 
 ax.legend(loc="lower right")
 ax.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig('output_images/roc_curve_scenario_E.png', dpi=150, bbox_inches='tight')
+plt.savefig(FIGURES_DIR / 'roc_curve_scenario_E.png', dpi=150, bbox_inches='tight')
 plt.show()
-print('ROC Curve tersimpan di output_images/roc_curve_scenario_E.png')
+print(f'ROC Curve tersimpan di {FIGURES_DIR / "roc_curve_scenario_E.png"}')
 print('PENINGKATAN AUC-ROC DIBANDINGKAN BASELINE (Skenario A)\n')
 for mname in MODELS.keys():
     sub = results_df[results_df['Model'] == mname].set_index('Skenario')
@@ -275,7 +285,10 @@ imp = pd.DataFrame({
 
 imp = imp.sort_values('mean_abs_shap', ascending=False)
 print('TOP 20 FITUR TERPENTING (SHAP)')
-try: display(imp.head(20))
+try:
+    display(imp.head(20))
+except NameError:
+    print(imp.head(20))
 plt.figure(figsize=(10, 8))
 shap.summary_plot(sv_class1, X_sample_shap,
                   feature_names=best['features'],
@@ -285,9 +298,9 @@ shap.summary_plot(sv_class1, X_sample_shap,
 plt.title('SHAP Feature Importance - Top Fitur untuk Prediksi Stroke',
           fontsize=13, fontweight='bold')
 plt.tight_layout()
-plt.savefig('output_images/shap_summary_bar.png', dpi=150, bbox_inches='tight')
+plt.savefig(FIGURES_DIR / 'shap_summary_bar.png', dpi=150, bbox_inches='tight')
 plt.show()
-print('SHAP bar chart tersimpan di output_images/shap_summary_bar.png')
+print(f'SHAP bar chart tersimpan di {FIGURES_DIR / "shap_summary_bar.png"}')
 plt.figure(figsize=(10, 8))
 shap.summary_plot(sv_class1, X_sample_shap,
                   feature_names=best['features'],
@@ -295,9 +308,9 @@ shap.summary_plot(sv_class1, X_sample_shap,
 plt.title('SHAP Beeswarm - Pengaruh Nilai Fitur terhadap Prediksi Stroke',
           fontsize=13, fontweight='bold')
 plt.tight_layout()
-plt.savefig('output_images/shap_beeswarm.png', dpi=150, bbox_inches='tight')
+plt.savefig(FIGURES_DIR / 'shap_beeswarm.png', dpi=150, bbox_inches='tight')
 plt.show()
-print('SHAP beeswarm plot tersimpan di output_images/shap_beeswarm.png')
+print(f'SHAP beeswarm plot tersimpan di {FIGURES_DIR / "shap_beeswarm.png"}')
 available_feats = best['features']
 shap_df = pd.DataFrame(np.abs(sv_class1), columns=available_feats)
 mean_shap = shap_df.mean()
@@ -329,15 +342,15 @@ ax.set_title('Kontribusi Kelompok Fitur Gaya Hidup vs Klinis\n(berdasarkan SHAP)
              fontsize=12, fontweight='bold')
 ax.grid(axis='x', alpha=0.3)
 plt.tight_layout()
-plt.savefig('output_images/shap_groups.png', dpi=150, bbox_inches='tight')
+plt.savefig(FIGURES_DIR / 'shap_groups.png', dpi=150, bbox_inches='tight')
 plt.show()
 
 print('\nRANKING KELOMPOK FITUR (berdasarkan SHAP)')
 for rank, (grp, val) in enumerate(gs.sort_values(ascending=False).items(), 1):
     print(f'{rank}. {grp}: {val:.4f}')
 # Simpan tabel hasil ke CSV
-results_df.to_csv('hasil_eksperimen.csv', index=False)
-print('hasil_eksperimen.csv tersimpan.')
+results_df.to_csv(TABLES_DIR / 'hasil_eksperimen.csv', index=False)
+print(f'hasil_eksperimen.csv tersimpan di {TABLES_DIR / "hasil_eksperimen.csv"}.')
 
 # Download dari Colab
 try:
