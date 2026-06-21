@@ -26,9 +26,9 @@ COLORS = ['#2C3E93', '#F5A623', '#10B981', '#E74C3C', '#8B5CF6']
 
 # Buat folder untuk gambar output
 BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / 'data'
-FIGURES_DIR = BASE_DIR / 'reports' / 'figures'
-TABLES_DIR = BASE_DIR / 'reports' / 'tables'
+DATA_DIR = BASE_DIR.parent / 'data' / 'processed' / 'feature_selection'
+FIGURES_DIR = BASE_DIR.parent / 'reports' / 'feature_selection' / 'figures'
+TABLES_DIR = BASE_DIR.parent / 'reports' / 'feature_selection' / 'tables'
 
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 TABLES_DIR.mkdir(parents=True, exist_ok=True)

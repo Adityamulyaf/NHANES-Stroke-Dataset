@@ -67,10 +67,19 @@ Model terbaik diinterpretasikan secara global dan lokal menggunakan **SHAP (SHap
 
 ## Struktur Folder
 * `data/raw/`: Dataset mentah NHANES dalam format `.xpt`.
-* `data/processed/`: Dataset hasil preprocessing dan metadata fitur untuk training.
-* `notebooks/`: Notebook pipeline utama.
-* `reports/figures/`: Visualisasi evaluasi model dan SHAP.
-* `reports/tables/`: Tabel hasil eksperimen.
-* `experiments/with_feature_selection/`: Varian eksperimen yang menggunakan seleksi fitur.
+* `data/processed/`:
+  * `manual/`: Dataset hasil preprocessing (31 fitur) untuk pipeline baseline.
+  * `feature_selection/`: Dataset hasil preprocessing (24 fitur) untuk pipeline seleksi fitur statistik.
+* `notebooks/`:
+  * `manual/`: Notebook pengerjaan utama untuk pipeline baseline.
+  * `feature_selection/`: Notebook pengerjaan utama untuk pipeline seleksi fitur statistik.
+* `models/`:
+  * `manual/`: Tempat menyimpan file model terlatih untuk pipeline baseline.
+  * `feature_selection/`: Tempat menyimpan file model terlatih untuk pipeline seleksi fitur.
+* `reports/`:
+  * `manual/`: Visualisasi (`figures/`) dan tabel metrik (`tables/`) untuk pipeline baseline.
+  * `feature_selection/`: Visualisasi (`figures/`) dan tabel metrik (`tables/`) untuk pipeline seleksi fitur.
+* `experiments/`: Berisi skrip Python independen (seperti `run_train_feature_selection.py`).
 * `docs/`: Dokumentasi progres dan referensi proyek.
 * `external/`: Salinan repo/dataset eksternal sebagai referensi.
+
