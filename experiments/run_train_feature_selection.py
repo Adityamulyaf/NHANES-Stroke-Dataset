@@ -352,6 +352,12 @@ for rank, (grp, val) in enumerate(gs.sort_values(ascending=False).items(), 1):
 results_df.to_csv(TABLES_DIR / 'hasil_eksperimen.csv', index=False)
 print(f'hasil_eksperimen.csv tersimpan di {TABLES_DIR / "hasil_eksperimen.csv"}.')
 
+# Simpan model terbaik ke folder models/
+MODELS_DIR = BASE_DIR.parent / 'models' / 'feature_selection'
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
+joblib.dump(best['model'], MODELS_DIR / 'rf_best_model.pkl')
+print(f"Model terbaik (Random Forest Skenario E) berhasil disimpan di {MODELS_DIR / 'rf_best_model.pkl'}")
+
 # Download dari Colab
 try:
     from google.colab import files
