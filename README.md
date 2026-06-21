@@ -61,5 +61,16 @@ Model terbaik diinterpretasikan secara global dan lokal menggunakan **SHAP (SHap
 ---
 
 ## Struktur Notebook & Dokumentasi
-* `preprocessing_nhanes.ipynb`: Mengunduh dataset mentah, melakukan penggabungan, pembersihan, split data, standardisasi, SMOTE, dan mengekspor file siap latih (`nhanes_train_scaled.csv`, `nhanes_test_scaled.csv`, `feature_groups.pkl`).
-* `training_nhanes.ipynb`: Memuat data preprocessed, melakukan perbandingan training & evaluasi pada 5 skenario eksperimen, menyimpan gambar visualisasi, dan menghitung SHAP values untuk interpretasi model.
+* `notebooks/preprocessing_nhanes.ipynb`: Mengunduh dataset mentah, melakukan penggabungan, pembersihan, split data, standardisasi, SMOTE, dan mengekspor file siap latih ke `data/processed/`.
+* `notebooks/training_nhanes.ipynb`: Memuat data preprocessed, melakukan perbandingan training & evaluasi pada 5 skenario eksperimen, menyimpan tabel ke `reports/tables/`, menyimpan gambar ke `reports/figures/`, dan menghitung SHAP values untuk interpretasi model.
+* `notebooks/feature_selection.ipynb`: Melakukan eksplorasi seleksi fitur dari dataset bersih di `data/processed/nhanes_clean.csv`.
+
+## Struktur Folder
+* `data/raw/`: Dataset mentah NHANES dalam format `.xpt`.
+* `data/processed/`: Dataset hasil preprocessing dan metadata fitur untuk training.
+* `notebooks/`: Notebook pipeline utama.
+* `reports/figures/`: Visualisasi evaluasi model dan SHAP.
+* `reports/tables/`: Tabel hasil eksperimen.
+* `experiments/with_feature_selection/`: Varian eksperimen yang menggunakan seleksi fitur.
+* `docs/`: Dokumentasi progres dan referensi proyek.
+* `external/`: Salinan repo/dataset eksternal sebagai referensi.
