@@ -13,7 +13,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-100 bg-white/80 backdrop-blur-md shadow-sm">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="relative mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         
         {/* Logo Kiri Atas */}
         <Link href="/" className="flex items-center gap-2.5 transition hover:opacity-80">
@@ -31,7 +31,7 @@ export default function Navbar() {
         
         {/* Menu Navigasi Tengah (Disembunyikan di mode kuis agar user fokus) */}
         {!isQuizMode && (
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-500">
+          <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-8 text-sm font-medium text-zinc-500">
             <Link href="/" className={`hover:text-teal transition ${pathname === "/" ? "text-teal font-semibold" : ""}`}>
               Beranda
             </Link>
