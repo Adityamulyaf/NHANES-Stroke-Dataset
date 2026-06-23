@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import StrikethroughTyper from "@/components/StrikethroughTyper";
 
 const steps = [
   {
@@ -35,9 +38,14 @@ export default function Home() {
             Anda
             <br />
             dalam{" "}
-            <span className="text-teal border-b-[3px] border-teal pb-0.5">
-              5 Menit
-            </span>
+            <StrikethroughTyper
+              words={["1 Jam", "30 Menit", "5 Menit"]}
+              typingSpeed={90}
+              strikeDelay={600}
+              nextDelay={500}
+              className="text-teal"
+              finalClassName="border-b-[3px] border-teal pb-0.5"
+            />
           </h1>
 
           <p className="text-base sm:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed">
