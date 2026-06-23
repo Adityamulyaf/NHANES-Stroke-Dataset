@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Stroke Risk Assessment - NHANES",
+  title: "MediTrust - Stroke Risk Assessment",
   description: "Prediksi risiko stroke berbasis machine learning dari dataset NHANES",
   icons: {
     icon: "/favicon.png",

@@ -19,13 +19,13 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2.5 transition hover:opacity-80">
           <Image 
             src="/favicon.png" 
-            alt="Stroke Assessment Logo" 
+            alt="MediTrust Logo" 
             width={36} 
             height={36} 
             className="object-contain"
           />
           <span className="text-lg font-bold tracking-tight text-teal-dark hidden sm:inline-block">
-            Stroke Risk Assessment
+            MediTrust
           </span>
         </Link>
         
