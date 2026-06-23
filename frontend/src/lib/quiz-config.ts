@@ -1,4 +1,4 @@
-export type QuestionType = "number" | "yesno" | "scale";
+export type QuestionType = "number" | "yesno" | "scale" | "slider";
 
 export interface QuizQuestion {
   key: string;
@@ -11,6 +11,7 @@ export interface QuizQuestion {
   step?: number;
   defaultValue?: number;
   scaleLabels?: string[];
+  sliderColor?: string;
 }
 
 export interface QuizSection {
@@ -65,7 +66,7 @@ export const quizSections: QuizSection[] = [
         key: "waist_circ",
         label: "Lingkar Pinggang",
         description: "Ukur di titik terkecil pinggang Anda.",
-        type: "number",
+        type: "slider",
         unit: "cm",
         min: 40,
         max: 180,
@@ -76,10 +77,10 @@ export const quizSections: QuizSection[] = [
         key: "systolic_bp",
         label: "Tekanan Darah Sistolik",
         description: "Angka atas pada pengukuran tensi. Jika tidak tahu, isi 120.",
-        type: "number",
+        type: "slider",
         unit: "mmHg",
-        min: 60,
-        max: 250,
+        min: 70,
+        max: 200,
         step: 1,
         defaultValue: 120,
       },
@@ -87,10 +88,10 @@ export const quizSections: QuizSection[] = [
         key: "diastolic_bp",
         label: "Tekanan Darah Diastolik",
         description: "Angka bawah pada pengukuran tensi. Jika tidak tahu, isi 80.",
-        type: "number",
+        type: "slider",
         unit: "mmHg",
         min: 40,
-        max: 150,
+        max: 130,
         step: 1,
         defaultValue: 80,
       },
@@ -263,7 +264,7 @@ export const quizSections: QuizSection[] = [
         key: "vigorous_leisure_min",
         label: "Durasi Olahraga Berat",
         description: "Rata-rata berapa menit per hari? (Isi 0 jika tidak melakukan)",
-        type: "number",
+        type: "slider",
         unit: "menit/hari",
         min: 0,
         max: 480,

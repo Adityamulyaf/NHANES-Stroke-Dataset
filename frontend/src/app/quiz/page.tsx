@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { quizSections, QuizQuestion } from "@/lib/quiz-config";
 import { predict } from "@/lib/api";
 
@@ -12,11 +13,11 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [answers, setAnswers] = useState<Record<string, number>>(() => {
-    const init: Record<string, number> = {};
+  const [answers, setAnswers] = useState<Record<string, number | undefined>>(() => {
+    const init: Record<string, number | undefined> = {};
     quizSections.forEach((section) =>
       section.questions.forEach((q) => {
-        init[q.key] = q.defaultValue ?? 0;
+        init[q.key] = undefined;
       })
     );
     return init;
@@ -27,14 +28,23 @@ export default function QuizPage() {
   const isLastStep = step === totalSteps - 1;
   const progress = Math.round(((step + 1) / totalSteps) * 100);
 
-  const updateAnswer = (key: string, value: number) =>
+  const updateAnswer = (key: string, value: number | undefined) =>
     setAnswers((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
+    
+    // Gunakan nilai default jika ada jawaban yang masih kosong
+    const finalAnswers: Record<string, number> = {};
+    quizSections.forEach((section) =>
+      section.questions.forEach((q) => {
+        finalAnswers[q.key] = answers[q.key] !== undefined ? answers[q.key]! : (q.defaultValue ?? 0);
+      })
+    );
+
     try {
-      const result = await predict(answers);
+      const result = await predict(finalAnswers);
       sessionStorage.setItem("predict_result", JSON.stringify(result));
       router.push("/result");
     } catch (err) {
@@ -42,6 +52,8 @@ export default function QuizPage() {
       setLoading(false);
     }
   };
+
+  const isSectionComplete = currentSection.questions.every((q) => answers[q.key] !== undefined);
 
   return (
     <main className="flex flex-1 flex-col items-center bg-[#f6f8fa] px-4 py-6 sm:py-8">
@@ -84,22 +96,33 @@ export default function QuizPage() {
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl border border-zinc-100 bg-white shadow-sm p-6 sm:p-8 space-y-6">
-          <div className="space-y-1">
-            <h2 className="text-xl font-bold text-zinc-900">{currentSection.title}</h2>
-            <p className="text-sm text-zinc-400 leading-relaxed">{currentSection.description}</p>
-          </div>
+        <div className="rounded-2xl border border-zinc-100 bg-white shadow-sm p-6 sm:p-8 overflow-hidden min-h-[300px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="space-y-6"
+            >
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold text-zinc-900">{currentSection.title}</h2>
+                <p className="text-sm text-zinc-400 leading-relaxed">{currentSection.description}</p>
+              </div>
 
-          <div className="space-y-4">
-            {currentSection.questions.map((q) => (
-              <QuestionInput
-                key={q.key}
-                question={q}
-                value={answers[q.key]}
-                onChange={(val) => updateAnswer(q.key, val)}
-              />
-            ))}
-          </div>
+              <div className="space-y-4">
+                {currentSection.questions.map((q) => (
+                  <QuestionInput
+                    key={q.key}
+                    question={q}
+                    value={answers[q.key]}
+                    onChange={(val) => updateAnswer(q.key, val)}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Error */}
@@ -136,8 +159,8 @@ export default function QuizPage() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={loading}
-              className="flex-1 rounded-2xl bg-teal-dark text-white py-4 text-sm font-semibold hover:bg-teal transition disabled:opacity-60"
+              disabled={loading || !isSectionComplete}
+              className="flex-1 rounded-2xl bg-teal-dark text-white py-4 text-sm font-semibold hover:bg-teal transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -153,7 +176,8 @@ export default function QuizPage() {
             <button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              className="flex-1 rounded-2xl bg-teal-dark text-white py-4 text-sm font-semibold hover:bg-teal transition"
+              disabled={!isSectionComplete}
+              className="flex-1 rounded-2xl bg-teal-dark text-white py-4 text-sm font-semibold hover:bg-teal transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Selanjutnya →
             </button>
@@ -169,18 +193,20 @@ export default function QuizPage() {
 
 interface QuestionInputProps {
   question: QuizQuestion;
-  value: number;
-  onChange: (val: number) => void;
+  value: number | undefined;
+  onChange: (val: number | undefined) => void;
 }
 
 function QuestionInput({ question, value, onChange }: QuestionInputProps) {
   const { key, label, description, type } = question;
-  const [numText, setNumText] = useState(String(value));
+  const [numText, setNumText] = useState(value !== undefined ? String(value) : "");
 
   // Sync when parent value changes (e.g. navigating back to a section)
-  const parentStr = String(value);
-  if (type === "number" && numText !== "" && parentStr !== numText) {
-    setNumText(parentStr);
+  if (type === "number") {
+    const expected = value !== undefined ? String(value) : "";
+    if (numText !== expected && parseInt(numText, 10) !== value) {
+      setNumText(expected);
+    }
   }
 
   return (
@@ -204,13 +230,23 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
             onChange={(e) => {
               const raw = e.target.value;
               setNumText(raw);
-              if (raw !== "") onChange(parseInt(raw, 10) || 0);
+              if (raw === "") {
+                onChange(undefined);
+              } else {
+                onChange(parseInt(raw, 10) || 0);
+              }
             }}
             onBlur={() => {
               if (numText === "") {
-                setNumText("0");
-                onChange(0);
+                onChange(undefined);
+                return;
               }
+              let num = parseInt(numText, 10) || 0;
+              // Clamp ke batas min/max yang didefinisikan di quiz-config
+              if (question.min !== undefined) num = Math.max(question.min, num);
+              if (question.max !== undefined) num = Math.min(question.max, num);
+              setNumText(String(num));
+              onChange(num);
             }}
             className="flex-1 bg-transparent px-4 py-3 text-sm text-zinc-900 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
@@ -219,6 +255,27 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
               {question.unit}
             </span>
           )}
+        </div>
+      )}
+
+      {type === "slider" && (
+        <div className="space-y-4 pt-2 px-1">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-zinc-400">{question.min} {question.unit}</span>
+            <span className="font-bold text-teal text-lg">
+              {value !== undefined ? value : "-"} <span className="text-sm font-medium text-zinc-500">{question.unit}</span>
+            </span>
+            <span className="text-zinc-400">{question.max} {question.unit}</span>
+          </div>
+          <input
+            type="range"
+            min={question.min}
+            max={question.max}
+            step={question.step ?? 1}
+            value={value !== undefined ? value : ((question.min ?? 0) + (question.max ?? 100)) / 2}
+            onChange={(e) => onChange(parseInt(e.target.value, 10))}
+            className={`w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer ${question.sliderColor ?? "accent-teal"}`}
+          />
         </div>
       )}
 

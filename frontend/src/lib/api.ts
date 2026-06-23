@@ -8,14 +8,6 @@ export interface PredictResponse {
 }
 
 // Map index pilihan quiz → nilai asli NHANES sebelum dikirim ke model
-const RACE_MAP: Record<number, number> = {
-  0: 2, // Hispanik / Amerika Latin
-  1: 3, // Kulit Putih (non-Hispanik)
-  2: 4, // Kulit Hitam (non-Hispanik)
-  3: 6, // Asia
-  4: 7, // Lainnya / Multi-ras
-};
-
 const EDUCATION_MAP: Record<number, number> = {
   0: 1, // Tidak tamat SD
   1: 2, // SD
@@ -34,9 +26,6 @@ const INCOME_MAP: Record<number, number> = {
 
 function mapAnswers(raw: Record<string, number>): Record<string, number> {
   const out = { ...raw };
-
-  // race: index 0–4 → nilai NHANES RIDRETH3
-  if (out.race !== undefined) out.race = RACE_MAP[out.race] ?? 6;
 
   // education: index 0–4 → nilai NHANES DMDEDUC2 (1–5)
   if (out.education !== undefined) out.education = EDUCATION_MAP[out.education] ?? 3;

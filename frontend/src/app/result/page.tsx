@@ -26,6 +26,33 @@ function normalizeResult(value: unknown): PredictResponse | null {
 export default function ResultPage() {
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    if (!result) return;
+    
+    const probability = Math.round(Math.max(0, Math.min(1, result.probability)) * 100);
+    const healthScore = 100 - probability;
+
+    let startTimestamp: number;
+    const duration = 1500; // 1.5s animation
+    
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      
+      // easeOutQuart
+      const easeProgress = 1 - Math.pow(1 - progress, 4);
+      setAnimatedScore(Math.round(easeProgress * healthScore));
+      
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    
+    const animationId = window.requestAnimationFrame(step);
+    return () => window.cancelAnimationFrame(animationId);
+  }, [result]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -81,6 +108,7 @@ export default function ResultPage() {
   const healthScore = 100 - probability;
   const explanation = result.explanation ?? [];
 
+
   return (
     <main className="flex flex-1 flex-col items-center bg-white px-4 py-6 sm:py-8">
       <div className="w-full max-w-5xl space-y-6">
@@ -91,9 +119,9 @@ export default function ResultPage() {
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-            Exit
+            Keluar
           </Link>
-          <span className="text-sm font-medium text-zinc-500">Assessment Selesai</span>
+          <span className="text-sm font-medium text-zinc-500">Penilaian Selesai</span>
         </div>
 
         {/* Status Card */}
@@ -114,10 +142,10 @@ export default function ResultPage() {
 
           <div className="space-y-3">
             <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900">
-              {isHighRisk ? "High Risk" : "Low Risk"}
+              {isHighRisk ? "Risiko Tinggi" : "Risiko Rendah"}
             </h1>
             <p className="text-2xl sm:text-3xl font-semibold text-teal">
-              {isHighRisk ? "Follow-up Recommended" : "Healthy Status Confirmed"}
+              {isHighRisk ? "Konsultasi Dianjurkan" : "Status Sehat Terkonfirmasi"}
             </p>
             <p className="mx-auto max-w-3xl text-base sm:text-lg leading-8 text-zinc-600">
               {isHighRisk
@@ -128,11 +156,11 @@ export default function ResultPage() {
 
           <div className="mx-auto mt-10 max-w-3xl space-y-2 text-left">
             <div className="flex items-center justify-between text-sm font-medium text-zinc-600">
-              <span>Health Score</span>
-              <span className="text-teal">{healthScore}/100</span>
+              <span>Skor Kesehatan</span>
+              <span className="text-teal">{animatedScore}/100</span>
             </div>
             <div className="h-3 overflow-hidden rounded-full bg-[#e7ecee]">
-              <div className="h-full rounded-full bg-blue transition-all duration-1000" style={{ width: `${healthScore}%` }} />
+              <div className="h-full rounded-full bg-blue transition-none" style={{ width: `${animatedScore}%` }} />
             </div>
           </div>
         </div>
@@ -141,7 +169,7 @@ export default function ResultPage() {
           <div className="space-y-4">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
               <span className="h-5 w-1 rounded-full bg-teal" />
-              Personalized Recommendations
+              Rekomendasi Personal
             </h2>
 
             <div className="grid gap-4">
@@ -175,7 +203,7 @@ export default function ResultPage() {
           <div className="space-y-4">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
               <span className="h-5 w-1 rounded-full bg-teal" />
-              Explanation
+              Penjelasan
             </h2>
 
             <div className="clinical-surface overflow-hidden rounded-[24px]">

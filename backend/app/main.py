@@ -30,23 +30,42 @@ MODEL_PATH = BASE_DIR / 'models' / 'feature_selection' / 'rf_best_model.pkl'
 SCALER_PATH = BASE_DIR / 'models' / 'feature_selection' / 'scaler.pkl'
 FEATURE_GROUPS_PATH = BASE_DIR / 'data' / 'processed' / 'feature_selection' / 'feature_groups.pkl'
 
+# Urutan fitur hardcoded sesuai model RF Skenario E (24 fitur)
+# Digunakan sebagai fallback jika feature_groups.pkl tidak tersedia di environment deploy
+_FALLBACK_FEATURE_ORDER = [
+    # Clinical (12)
+    'age', 'education', 'income_ratio', 'waist_circ', 'systolic_bp', 'diastolic_bp',
+    'hypertension', 'diabetes', 'heart_failure', 'coronary_disease', 'heart_attack', 'ever_smoked',
+    # Sleep (4)
+    'snoring_freq', 'sleep_apnea', 'sleep_problem_doctor', 'daytime_sleepy',
+    # Stress (5)
+    'stress_anhedonia', 'stress_depressed', 'stress_fatigue', 'stress_concentration', 'stress_self_esteem',
+    # Physical (3)
+    'vigorous_leisure', 'vigorous_leisure_min', 'moderate_leisure',
+]
+
 try:
     if not MODEL_PATH.exists() or not SCALER_PATH.exists():
         raise FileNotFoundError(f"Berkas model/scaler tidak ditemukan di: {MODEL_PATH} atau {SCALER_PATH}")
-    
+
     model = joblib.load(MODEL_PATH)
     scaler = joblib.load(SCALER_PATH)
-    feature_groups = joblib.load(FEATURE_GROUPS_PATH)
-    
-    # Ambil urutan fitur untuk mencegah kesalahan input kolom (misalignment)
-    CLINICAL = feature_groups['CLINICAL']
-    SLEEP = feature_groups['SLEEP']
-    STRESS = feature_groups['STRESS']
-    PHYSICAL = feature_groups['PHYSICAL']
-    FEATURE_ORDER = CLINICAL + SLEEP + STRESS + PHYSICAL
-    
-    print("[OK] Model, Scaler, dan Metadata Fitur berhasil dimuat!")
-    print(f"[OK] Jumlah fitur model: {len(FEATURE_ORDER)}")
+    print("[OK] Model dan Scaler berhasil dimuat!")
+
+    # Coba muat feature_groups.pkl; jika tidak ada, gunakan fallback hardcoded
+    if FEATURE_GROUPS_PATH.exists():
+        feature_groups = joblib.load(FEATURE_GROUPS_PATH)
+        FEATURE_ORDER = (
+            feature_groups['CLINICAL'] +
+            feature_groups['SLEEP'] +
+            feature_groups['STRESS'] +
+            feature_groups['PHYSICAL']
+        )
+        print(f"[OK] Metadata fitur dimuat dari feature_groups.pkl ({len(FEATURE_ORDER)} fitur)")
+    else:
+        FEATURE_ORDER = _FALLBACK_FEATURE_ORDER
+        print(f"[WARN] feature_groups.pkl tidak ditemukan — menggunakan urutan fitur hardcoded ({len(FEATURE_ORDER)} fitur)")
+
 except Exception as e:
     print(f"[ERROR] Gagal memuat model: {e}")
     model, scaler, FEATURE_ORDER = None, None, []
