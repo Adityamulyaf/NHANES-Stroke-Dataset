@@ -25,7 +25,7 @@ export default function Navbar() {
             className="object-contain"
           />
           <span className="text-lg font-bold tracking-tight text-teal-dark hidden sm:inline-block">
-            StrokeRisk AI
+            Stroke Risk Assessment
           </span>
         </Link>
         
