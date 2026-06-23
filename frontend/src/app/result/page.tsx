@@ -86,14 +86,14 @@ export default function ResultPage() {
       <div className="w-full max-w-5xl space-y-6">
 
         {/* Back link */}
-        <div className="flex items-center justify-between rounded-t-2xl border border-[#dbe4e2] border-b-0 bg-white px-6 py-4">
+        <div className="flex items-center justify-between rounded-2xl border border-[#dbe4e2] bg-white px-6 py-4">
           <Link href="/" className="text-sm text-zinc-600 hover:text-teal transition flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
             Exit
           </Link>
-          <span className="text-sm font-medium text-zinc-500">{Math.round(healthScore)}% Complete</span>
+          <span className="text-sm font-medium text-zinc-500">Assessment Selesai</span>
         </div>
 
         {/* Status Card */}
