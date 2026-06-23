@@ -1,3 +1,13 @@
+---
+title: Nhanes Stroke Api
+emoji: 🧠
+colorFrom: teal
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Analisis Faktor Gaya Hidup pada Prediksi Risiko Stroke menggunakan Explainable Machine Learning
 
 Repository ini berisi proyek analisis dan prediksi risiko stroke menggunakan dataset survei nasional **NHANES (National Health and Nutrition Examination Survey) 2015-2016** dari CDC Amerika Serikat. Proyek ini mengevaluasi kontribusi faktor gaya hidup (tidur, stres, aktivitas fisik) sebagai tambahan dari data klinis dasar.
