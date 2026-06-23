@@ -1,7 +1,7 @@
 ---
 title: Nhanes Stroke Api
 emoji: 🧠
-colorFrom: teal
+colorFrom: green
 colorTo: blue
 sdk: docker
 app_port: 7860
