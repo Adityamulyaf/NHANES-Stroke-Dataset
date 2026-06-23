@@ -28,7 +28,9 @@ Repository ini berisi proyek analisis dan prediksi risiko stroke menggunakan dat
   * Evaluasi metrik performa lengkap (Accuracy, Precision, Recall, F1-Score, AUC-ROC) dan visualisasi grafik evaluasi.
   * Penerapan **SHAP values** untuk mengukur pengaruh dan signifikansi kontribusi kelompok fitur klinis vs gaya hidup secara kuantitatif.
 * **Progress 3: Web App Deployment**
-  * Mengemas model klasifikasi terbaik yang telah dilatih ke dalam bentuk aplikasi web interaktif untuk simulasi prediksi risiko stroke mandiri oleh pengguna.
+  * Mengemas model klasifikasi terbaik yang telah dilatih ke dalam bentuk aplikasi web interaktif (Next.js & FastAPI) untuk simulasi prediksi risiko stroke mandiri oleh pengguna.
+  * Integrasi Explainable AI (XAI) berbasis aturan klinis untuk analisis personal secara *real-time*.
+  * Deployment backend FastAPI menggunakan Docker di **Hugging Face Spaces** dan frontend di **Vercel**.
 
 ---
 
@@ -92,4 +94,47 @@ Model terbaik diinterpretasikan secara global dan lokal menggunakan **SHAP (SHap
 * `experiments/`: Berisi skrip Python independen (seperti `run_train_feature_selection.py`).
 * `docs/`: Dokumentasi progres dan referensi proyek.
 * `external/`: Salinan repo/dataset eksternal sebagai referensi.
+
+---
+
+## 🚀 Live Demo & Deployment
+
+Aplikasi ini telah dideploy secara publik dan dapat diakses melalui tautan berikut:
+* **Frontend Web App (Next.js)**: [https://nhanes-stroke-dataset.vercel.app](https://nhanes-stroke-dataset.vercel.app)
+* **Backend API (FastAPI)**: [Hugging Face Spaces](https://huggingface.co/spaces/adityamulyaf/nhanes-stroke-api)
+* **Direct API Endpoint**: `https://adityamulyaf-nhanes-stroke-api.hf.space`
+
+---
+
+## 💻 Panduan Menjalankan Secara Lokal
+
+### 1. Prasyarat
+Pastikan Anda sudah menginstal **Python 3.10+** dan **Node.js 18+**.
+
+### 2. Jalankan Backend (FastAPI)
+1. Buka terminal baru dan masuk ke root folder proyek:
+   ```bash
+   pip install -r backend/requirements.txt
+   ```
+2. Jalankan server backend menggunakan `uvicorn`:
+   ```bash
+   python -m uvicorn backend.app.main:app --reload --port 8000
+   ```
+   API akan berjalan di `http://localhost:8000`.
+
+### 3. Jalankan Frontend (Next.js)
+1. Buka terminal baru lainnya, lalu masuk ke direktori `frontend`:
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. Buat file `.env.local` di dalam folder `frontend/` dan tentukan URL API backend lokal Anda:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   ```
+3. Jalankan server Next.js dalam mode pengembangan:
+   ```bash
+   npm run dev
+   ```
+   Aplikasi akan berjalan di `http://localhost:3000`.
 
