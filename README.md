@@ -97,7 +97,7 @@ Model terbaik diinterpretasikan secara global dan lokal menggunakan **SHAP (SHap
 
 ---
 
-## 🚀 Live Demo & Deployment
+## Live Demo & Deployment
 
 Aplikasi ini telah dideploy secara publik dan dapat diakses melalui tautan berikut:
 * **Frontend Web App (Next.js)**: [https://nhanes-stroke-dataset.vercel.app](https://nhanes-stroke-dataset.vercel.app)
@@ -106,7 +106,7 @@ Aplikasi ini telah dideploy secara publik dan dapat diakses melalui tautan berik
 
 ---
 
-## 💻 Panduan Menjalankan Secara Lokal
+## Panduan Menjalankan Secara Lokal
 
 ### 1. Prasyarat
 Pastikan Anda sudah menginstal **Python 3.10+** dan **Node.js 18+**.
