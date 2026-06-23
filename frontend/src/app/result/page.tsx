@@ -153,7 +153,7 @@ export default function ResultPage() {
                   </svg>
                 </div>
                 <h3 className="mb-2 text-lg font-semibold text-zinc-900">Step 1</h3>
-                <p className="text-sm leading-7 text-zinc-600">
+                <p className="text-sm leading-7 text-zinc-600 text-justify">
                   {isHighRisk
                     ? "Pertimbangkan konsultasi ke tenaga medis untuk evaluasi lebih lanjut."
                     : "Pertahankan pola hidup sehat dan lakukan monitoring berkala."}
@@ -167,7 +167,7 @@ export default function ResultPage() {
                   </svg>
                 </div>
                 <h3 className="mb-2 text-lg font-semibold text-zinc-900">Step 2</h3>
-                <p className="text-sm leading-7 text-zinc-600">{result.recommendation}</p>
+                <p className="text-sm leading-7 text-zinc-600 text-justify">{result.recommendation}</p>
               </article>
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function ResultPage() {
                     <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-teal-light text-sm font-bold text-teal">
                       {i + 1}
                     </span>
-                    <span className="text-sm leading-7 text-zinc-700">{item}</span>
+                    <span className="text-sm leading-7 text-zinc-700 text-justify">{item}</span>
                   </div>
                 ))
               ) : (
@@ -197,14 +197,7 @@ export default function ResultPage() {
           </div>
         </section>
 
-        <section className="grid gap-3 sm:grid-cols-2">
-          <Link href="/quiz" className="rounded-2xl clinical-button-primary py-4 text-center text-sm font-semibold transition">
-            Download Summary
-          </Link>
-          <Link href="/" className="rounded-2xl border border-[#2c7f79] bg-white py-4 text-center text-sm font-semibold text-teal transition hover:bg-[#f3fbfa]">
-            Share with Doctor
-          </Link>
-        </section>
+
 
         <section className="rounded-[24px] border border-[#d8e1df] bg-[linear-gradient(135deg,#f4fbfa_0%,#ffffff_55%,#eaf3f7_100%)] p-6 sm:p-8">
           <div className="mx-auto max-w-3xl text-center space-y-3">

@@ -175,6 +175,13 @@ interface QuestionInputProps {
 
 function QuestionInput({ question, value, onChange }: QuestionInputProps) {
   const { key, label, description, type } = question;
+  const [numText, setNumText] = useState(String(value));
+
+  // Sync when parent value changes (e.g. navigating back to a section)
+  const parentStr = String(value);
+  if (type === "number" && numText !== "" && parentStr !== numText) {
+    setNumText(parentStr);
+  }
 
   return (
     <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-4 sm:p-5 space-y-3">
@@ -191,8 +198,20 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
             min={question.min}
             max={question.max}
             step={question.step ?? 1}
-            value={value}
-            onChange={(e) => onChange(Number(e.target.value))}
+            value={numText}
+            onKeyDown={(e) => { if (["e", "E", "+", "-", "."].includes(e.key)) e.preventDefault(); }}
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => {
+              const raw = e.target.value;
+              setNumText(raw);
+              if (raw !== "") onChange(parseInt(raw, 10) || 0);
+            }}
+            onBlur={() => {
+              if (numText === "") {
+                setNumText("0");
+                onChange(0);
+              }
+            }}
             className="flex-1 bg-transparent px-4 py-3 text-sm text-zinc-900 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           {question.unit && (
