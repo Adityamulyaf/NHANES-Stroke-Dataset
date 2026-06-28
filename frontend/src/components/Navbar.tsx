@@ -38,6 +38,9 @@ export default function Navbar() {
             <Link href="/#cara-kerja" className="hover:text-teal transition">
               Cara Kerja
             </Link>
+            <Link href="/#performa-model" className="hover:text-teal transition">
+              Performa Model
+            </Link>
           </nav>
         )}
 
