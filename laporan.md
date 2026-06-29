@@ -109,6 +109,12 @@ Berdasarkan pengujian pada subset data uji, penyederhanaan dimensi fitur dari 31
 *   **Skenario D (Klinis + Aktivitas Fisik)**: AUC-ROC XGBoost meningkat sebesar **+8.24%** (dari 0.7007 menjadi **0.7831**).
 *   **Skenario E (Klinis + Semua Gaya Hidup)**: Mengalami penurunan kinerja yang sangat tipis (< 2% pada Random Forest, dari 0.7819 menjadi **0.7678**). Penurunan minor ini sangat dapat diterima karena model menjadi jauh lebih sederhana (*parsimonious*), lebih efisien secara komputasi, dan lebih ramah bagi pengguna saat pengisian kuis.
 
+![Gambar 3.1: Perbandingan AUC-ROC Sebelum vs Sesudah Feature Selection](reports/feature_selection/figures/auc_comparison.png)
+*Gambar 3.1: Perbandingan AUC-ROC Sebelum vs Sesudah Feature Selection pada 5 Skenario Eksperimen.*
+
+![Gambar 3.2: Heatmap Matriks AUC-ROC Semua Model dan Skenario](reports/feature_selection/figures/heatmap_auc.png)
+*Gambar 3.2: Heatmap Matriks AUC-ROC Semua Kombinasi Model dan Skenario (24 Fitur).*
+
 #### 3.2 Pemilihan Model Terbaik & Penalaan Threshold
 Pada skenario gabungan seluruh gaya hidup (Skenario E) dengan 24 fitur, model **Random Forest** mencatatkan kinerja terbaik dengan nilai **AUC-ROC = 0.7678** (mengungguli XGBoost sebesar 0.7286 dan Decision Tree sebesar 0.6624 pada skenario yang sama). 
 
@@ -116,6 +122,9 @@ Penerapan threshold keputusan tuned **`0.2344`** memberikan dampak yang sangat k
 *   **Recall (Sensitivitas)** meningkat drastis dari **17.14%** (pada threshold bawaan 0.50) menjadi **77.14%** (pada threshold optimal). Kenaikan sensitivitas sebesar 4.5 kali lipat ini memastikan model berhasil mendeteksi sebagian besar penderita stroke aktual di data uji.
 *   **Akurasi** mengalami penurunan dari 90.57% menjadi **70.73%**. Ini merupakan konsekuensi logis (*trade-off*) dari klasifikasi yang lebih sensitif, di mana model lebih waspada dan memprediksi lebih banyak status positif demi keselamatan pasien.
 *   **Precision** terjaga stabil pada angka **8.52%**, meningkat lebih dari 2.3 kali lipat dibandingkan dengan probabilitas acak pada populasi umum (~3.6%).
+
+![Gambar 3.3: Kurva ROC Model Klasifikasi pada Skenario E](reports/feature_selection/figures/roc_curve_scenario_E.png)
+*Gambar 3.3: Kurva ROC Model Klasifikasi pada Skenario E (AUC-ROC Random Forest = 0.7678).*
 
 ```
 KINERJA RANDOM FOREST SKENARIO E (24 FITUR)
@@ -137,10 +146,22 @@ Berdasarkan pengujian nilai SHAP global pada model Random Forest Skenario E, tin
 3.  **Kelompok Aktivitas Fisik (Mean SHAP: 0.0728)**: Tidak adanya olahraga berat (`vigorous_leisure`) maupun olahraga sedang (`moderate_leisure`) rutin menempatkan titik data di sisi kanan positif SHAP, menunjukkan bahwa gaya hidup *sedentary* merupakan pemicu peningkatan risiko stroke yang signifikan.
 4.  **Kelompok Stres (Mean SHAP: 0.0409)**: Gejala kehilangan minat (`stress_anhedonia`) dan kelelahan fisik (`stress_fatigue`) PHQ-9 berkontribusi pada peningkatan risiko psikologis, meskipun memiliki dampak terkecil dibanding kelompok lainnya.
 
+![Gambar 3.4: SHAP Global Feature Importance (Rata-rata Dampak Absolut)](reports/feature_selection/figures/shap_summary_bar.png)
+*Gambar 3.4: SHAP Global Feature Importance (Rata-rata Dampak Absolut pada Output Model).*
+
+![Gambar 3.5: SHAP Beeswarm Plot Skenario E](reports/feature_selection/figures/shap_beeswarm.png)
+*Gambar 3.5: SHAP Beeswarm Plot Skenario E (Menunjukkan arah pengaruh nilai/warna fitur terhadap risiko).*
+
+![Gambar 3.6: Kontribusi Kumulatif Rata-rata Berdasarkan Kelompok Fitur](reports/feature_selection/figures/shap_groups.png)
+*Gambar 3.6: Kontribusi Kumulatif Rata-rata Berdasarkan Kelompok Fitur (Klinis, Tidur, Aktivitas Fisik, Stres).*
+
 #### 3.4 Implementasi XAI & Threshold di Web App
 Dalam antarmuka web, model AI ini ditonjolkan secara interaktif pada halaman hasil:
 *   **Bilah Threshold Youden**: Menggambarkan letak probabilitas risiko stroke pengguna pada bar 0-100% dengan penanda garis merah batas risiko optimal di titik **`23.44%`**. Jika probabilitas $\ge 23.44\%$, status akan langsung berubah menjadi "Risiko Tinggi". Pengguna juga disajikan informasi edukatif mengenai alasan penyesuaian threshold statistik ini.
 *   **Bagan Batang Dua Arah SHAP Lokal**: Menampilkan 6 faktor terbesar yang menggeser risiko pengguna. Misalnya, jika pengguna berolahraga rutin dan berpendidikan tinggi, bagan menunjukkan batang hijau yang memanjang ke kiri (contoh: `Olahraga Berat -14.0%` dan `Tingkat Pendidikan -3.5%`). Sebaliknya, jika tensi pengguna tinggi, bagan menampilkan batang merah yang memanjang ke kanan (contoh: `Tekanan Darah Sistolik +3.6%`). Hal ini menerjemahkan model machine learning yang rumit menjadi wawasan kesehatan yang transparan dan dapat dipahami secara langsung oleh pengguna.
+
+<!-- [PLACEHOLDER GAMBAR: screenshot_dashboard_hasil.png] -->
+*Gambar 3.7: Tangkapan layar antarmuka dashboard hasil website MediTrust yang menampilkan Risk Gauge dengan batas Youden's Threshold (23.44%) dan Horizontal Dual-Direction SHAP Bar Chart secara real-time.*
 
 ---
 
