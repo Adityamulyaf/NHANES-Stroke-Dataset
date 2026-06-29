@@ -5,6 +5,7 @@ export interface PredictResponse {
   probability: number;
   explanation: string[];
   recommendation: string;
+  shap_contributions?: Array<{ feature: string; value: number }>;
 }
 
 // Map index pilihan quiz → nilai asli NHANES sebelum dikirim ke model
