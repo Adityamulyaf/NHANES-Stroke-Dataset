@@ -2,6 +2,7 @@ import os
 import joblib
 import numpy as np
 import pandas as pd
+import shap
 from pathlib import Path
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
@@ -44,6 +45,8 @@ _FALLBACK_FEATURE_ORDER = [
     'vigorous_leisure', 'vigorous_leisure_min', 'moderate_leisure',
 ]
 
+explainer = None
+
 try:
     if not MODEL_PATH.exists() or not SCALER_PATH.exists():
         raise FileNotFoundError(f"Berkas model/scaler tidak ditemukan di: {MODEL_PATH} atau {SCALER_PATH}")
@@ -51,6 +54,13 @@ try:
     model = joblib.load(MODEL_PATH)
     scaler = joblib.load(SCALER_PATH)
     print("[OK] Model dan Scaler berhasil dimuat!")
+
+    # Inisialisasi SHAP TreeExplainer
+    try:
+        explainer = shap.TreeExplainer(model)
+        print("[OK] SHAP TreeExplainer berhasil diinisialisasi!")
+    except Exception as e_shap:
+        print(f"[WARN] Gagal menginisialisasi SHAP TreeExplainer: {e_shap}")
 
     # Coba muat feature_groups.pkl; jika tidak ada, gunakan fallback hardcoded
     if FEATURE_GROUPS_PATH.exists():
@@ -203,12 +213,35 @@ def predict_stroke(data: StrokeInput):
                 "serta melakukan deteksi dini (medical check-up) berkala setidaknya sekali dalam setahun."
             )
             
+        # 7.5 Hitung kontribusi SHAP lokal secara real-time
+        shap_contributions = []
+        if explainer is not None:
+            try:
+                # Menghitung SHAP values untuk input saat ini (shape: 1, 24, 2)
+                shaps = explainer.shap_values(input_scaled)
+                if len(shaps.shape) == 3:
+                    sv_class1 = shaps[0, :, 1].tolist()
+                elif isinstance(shaps, list) and len(shaps) == 2:
+                    sv_class1 = shaps[1][0].tolist()
+                else:
+                    sv_class1 = shaps[0].tolist()
+                
+                # Petakan ke nama fitur
+                for feat, val in zip(FEATURE_ORDER, sv_class1):
+                    shap_contributions.append({
+                        "feature": feat,
+                        "value": float(val)
+                    })
+            except Exception as shap_err:
+                print(f"[ERROR] Gagal menghitung SHAP: {shap_err}")
+
         # 8. Return response sesuai kontrak Next.js (PredictResponse di frontend/src/lib/api.ts)
         return {
             "prediction": prediction_label,    # "high_risk" atau "low_risk"
             "probability": proba,              # Mengembalikan float antara 0.0 s.d 1.0 (Next.js mengalikan * 100)
             "explanation": explanations,        # Array of strings
-            "recommendation": recommendation   # String tunggal rekomendasi
+            "recommendation": recommendation,  # String tunggal rekomendasi
+            "shap_contributions": shap_contributions
         }
         
     except Exception as e:
