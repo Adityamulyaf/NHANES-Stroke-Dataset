@@ -101,13 +101,21 @@ Sistem diimplementasikan secara terpisah (*decoupled*) dengan arsitektur modern:
 ### 3. Hasil dan Pembahasan
 
 #### 3.1 Dampak Penerapan Feature Selection
-Berdasarkan pengujian pada subset data uji, penyederhanaan dimensi fitur dari 31 menjadi 24 secara konsisten meningkatkan generalisasi model dan mengurangi *overfitting* di hampir seluruh skenario eksperimen. Hal ini dibuktikan oleh peningkatan skor AUC-ROC dan Tuned F1-Score:
+Berdasarkan pengujian pada subset data uji, penyederhanaan dimensi fitur dari 31 menjadi 24 secara konsisten meningkatkan generalisasi model dan mengurangi *overfitting* di hampir seluruh skenario eksperimen. Rincian perbandingan metrik kinerja sebelum dan sesudah penerapan *feature selection* disajikan pada Tabel 3.1 berikut:
 
-*   **Skenario A (Klinis Saja)**: AUC-ROC XGBoost meningkat masif sebesar **+12.71%** (dari 0.6961 menjadi **0.8232**).
-*   **Skenario B (Klinis + Tidur)**: AUC-ROC XGBoost meningkat sebesar **+7.64%** (dari 0.7375 menjadi **0.8139**).
-*   **Skenario C (Klinis + Stres)**: AUC-ROC XGBoost meningkat sebesar **+7.03%** (dari 0.7361 menjadi **0.8064**). Selain itu, Tuned F1-Score melonjak drastis sebesar **+81.5%** (dari 0.1157 menjadi **0.2101**).
-*   **Skenario D (Klinis + Aktivitas Fisik)**: AUC-ROC XGBoost meningkat sebesar **+8.24%** (dari 0.7007 menjadi **0.7831**).
-*   **Skenario E (Klinis + Semua Gaya Hidup)**: Mengalami penurunan kinerja yang sangat tipis (< 2% pada Random Forest, dari 0.7819 menjadi **0.7678**). Penurunan minor ini sangat dapat diterima karena model menjadi jauh lebih sederhana (*parsimonious*), lebih efisien secara komputasi, dan lebih ramah bagi pengguna saat pengisian kuis.
+##### Tabel 3.1: Perbandingan Kinerja Sebelum vs. Sesudah Feature Selection (FS)
+| Skenario | Domain Fitur | Model Terbaik | Metrik Evaluasi | Sebelum FS (31 Fitur) | Sesudah FS (24 Fitur) | Selisih Perubahan |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Skenario A** | Klinis & Demografi (Baseline) | XGBoost | AUC-ROC | 0.6961 | 0.8232 | **+0.1271 (+12.71%)** |
+| **Skenario B** | Klinis + Kualitas Tidur | XGBoost | AUC-ROC | 0.7375 | 0.8139 | **+0.0764 (+7.64%)** |
+| **Skenario C** | Klinis + Stres & Depresi | XGBoost | AUC-ROC | 0.7361 | 0.8064 | **+0.0703 (+7.03%)** |
+| | | XGBoost | Tuned F1-Score | 0.1157 | 0.2101 | **+0.0944 (+81.59%)** |
+| **Skenario D** | Klinis + Aktivitas Fisik | XGBoost | AUC-ROC | 0.7007 | 0.7831 | **+0.0824 (+8.24%)** |
+| **Skenario E** | Klinis + Semua Gaya Hidup | Random Forest | AUC-ROC | 0.7819 | 0.7678 | *-0.0141 (-1.41%)* |
+
+Berdasarkan matriks perbandingan pada Tabel 3.1 di atas, pemangkasan fitur *noise* melalui seleksi statistik memberikan dua implikasi utama:
+1. **Peningkatan Kinerja pada Skenario Parsial (A, B, C, D)**: Mereduksi jumlah fitur meningkatkan generalisasi model ensemble secara signifikan, terutama pada model berbasis boosting (XGBoost) yang sangat sensitif terhadap variabel redundan. Peningkatan dramatis terlihat pada F1-Score Skenario C (+81.59%) dan AUC-ROC Skenario A (+12.71%). Hal ini menunjukkan batas keputusan (*decision boundary*) yang dibentuk model menjadi lebih kokoh tanpa pengaruh variabel pengganggu.
+2. **Efisiensi Komputasi pada Skenario Komprehensif (E)**: Meskipun Skenario E mengalami sedikit penurunan nilai AUC-ROC sebesar 1.41% pada model Random Forest, model yang dihasilkan menjadi jauh lebih ringkas (*parsimonious*). Hal ini mempercepat waktu pelatihan (*training time*), mengurangi konsumsi memori saat di-deploy di web app, serta menyederhanakan jumlah pertanyaan kuis sehingga meningkatkan kenyamanan pengisian (*user experience*) tanpa mengorbankan performa klasifikasi secara signifikan.
 
 ![Gambar 3.1: Perbandingan AUC-ROC Sebelum vs Sesudah Feature Selection](reports/feature_selection/figures/auc_comparison.png)
 *Gambar 3.1: Perbandingan AUC-ROC Sebelum vs Sesudah Feature Selection pada 5 Skenario Eksperimen.*
