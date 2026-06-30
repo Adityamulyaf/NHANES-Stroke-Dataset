@@ -56,8 +56,11 @@ export default function Navbar() {
           ) : (
             <Link
               href="/"
-              className="text-xs font-medium text-zinc-400 hover:text-zinc-600 transition flex items-center gap-1"
+              className="flex items-center gap-2 rounded-full border-2 border-teal px-5 py-2 text-sm font-semibold text-teal transition hover:bg-teal hover:text-white shadow-sm hover:shadow"
             >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
               Batalkan
             </Link>
           )}

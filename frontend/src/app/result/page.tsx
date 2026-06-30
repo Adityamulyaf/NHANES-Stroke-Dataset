@@ -153,6 +153,12 @@ export default function ResultPage() {
   const topShapContributions = sortedContributions.slice(0, 6);
 
 
+  // Smart tooltip anchor: prevent overflow at edges
+  const tooltipTranslate =
+    rawProbability < 15 ? "translateX(0%)" :
+    rawProbability > 85 ? "translateX(-100%)" :
+    "translateX(-50%)";
+
   return (
     <main className="flex flex-1 flex-col items-center bg-white px-4 py-6 sm:py-8">
       <div className="w-full max-w-5xl space-y-6">
@@ -225,39 +231,53 @@ export default function ResultPage() {
               </span>
             </div>
 
-            {/* Visual Threshold Slider Bar */}
-            <div className="relative h-6 bg-zinc-100 rounded-lg border border-zinc-200 flex items-center overflow-visible">
-              {/* Safe Range (0% to 23.44%) */}
-              <div className="h-full bg-emerald-100/50 border-r border-zinc-300 rounded-l-lg flex items-center pl-2 text-[9px] sm:text-[10px] text-emerald-800 font-semibold" style={{ width: '23.44%' }}>
-                Aman
-              </div>
-              {/* Warning Range (23.44% to 100%) */}
-              <div className="h-full bg-rose-50 flex items-center pl-2 text-[9px] sm:text-[10px] text-rose-800 font-semibold rounded-r-lg" style={{ width: '76.56%' }}>
-                Risiko Tinggi
+            {/* Visual Threshold Slider — track + thumb design */}
+            <div className="relative mt-10">
+
+              {/* Track (overflow-visible so thumb protrudes) */}
+              <div className="relative h-3 rounded-full overflow-visible">
+                {/* Safe zone */}
+                <div className="absolute left-0 top-0 h-full bg-emerald-200 rounded-l-full" style={{ width: "23.44%" }} />
+                {/* Risk zone */}
+                <div className="absolute top-0 h-full bg-rose-200 rounded-r-full" style={{ left: "23.44%", right: 0 }} />
+                {/* Threshold marker line — lives inside the track */}
+                <div className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-10" style={{ left: "23.44%" }} />
               </div>
 
-              {/* Threshold Indicator Line & Label */}
-              <div className="absolute left-[23.44%] top-0 bottom-0 w-[2px] bg-red-600 z-20 flex flex-col items-center">
-                <span className="absolute top-6 transform -translate-x-1/2 whitespace-nowrap text-[8px] sm:text-[9px] font-bold text-red-600 bg-white px-1.5 py-0.5 border border-red-200 rounded shadow-sm">
-                  Batas Threshold AI (23.44%)
+              {/* Row 1: Region labels */}
+              <div className="flex mt-2 text-[9px] sm:text-[10px] font-semibold select-none">
+                <span className="text-emerald-700" style={{ width: "23.44%" }}>Aman</span>
+                <span className="text-rose-700 pl-1" style={{ width: "76.56%" }}>Risiko Tinggi</span>
+              </div>
+
+              {/* Row 2: Threshold label — own row, centered on the 23.44% mark */}
+              <div className="relative h-5 mt-0.5">
+                <span
+                  className="absolute whitespace-nowrap text-[8px] font-bold text-red-600 bg-white px-1.5 py-0.5 border border-red-200 rounded shadow-sm"
+                  style={{ left: "23.44%", transform: "translateX(-50%)" }}
+                >
+                  Batas AI (23.44%)
                 </span>
               </div>
 
-              {/* User Probability Pin */}
-              <div 
-                className="absolute h-4 w-4 bg-zinc-800 border-2 border-white rounded-full shadow-md z-30 transition-all duration-1000"
-                style={{ 
-                  left: `calc(${Math.max(0, Math.min(100, rawProbability))}% - 8px)`
-                }}
+              {/* Thumb pin — absolutely positioned relative to the outer wrapper */}
+              <div
+                className="absolute z-30 transition-all duration-1000"
+                style={{ top: 0, left: `calc(${Math.max(0, Math.min(100, rawProbability))}% - 10px)` }}
               >
-                <span className="absolute -top-7 transform -translate-x-1/2 whitespace-nowrap text-[9px] sm:text-[10px] font-bold bg-zinc-800 text-white px-1.5 py-0.5 rounded shadow-md">
+                {/* Tooltip above */}
+                <span
+                  className="absolute -top-8 whitespace-nowrap text-[9px] sm:text-[10px] font-bold bg-zinc-800 text-white px-2 py-0.5 rounded-full shadow-md"
+                  style={{ transform: tooltipTranslate }}
+                >
                   Anda: {rawProbability.toFixed(1)}%
                 </span>
+                {/* Circle thumb — -mt-1 centers it on the 12px (h-3) track */}
+                <div className="w-5 h-5 -mt-1 rounded-full bg-zinc-900 border-[3px] border-white shadow-lg ring-2 ring-zinc-300" />
               </div>
+
             </div>
 
-            {/* Spacer for threshold label */}
-            <div className="h-4" />
 
             {/* Threshold Explanation Note */}
             <div className="rounded-2xl border border-[#d8e1df] bg-teal-light/20 p-4 mt-6 text-xs text-zinc-600 leading-relaxed space-y-2">
