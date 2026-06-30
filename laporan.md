@@ -113,9 +113,9 @@ Berdasarkan pengujian pada subset data uji, penyederhanaan dimensi fitur dari 31
 | **Skenario D** | Klinis + Aktivitas Fisik | XGBoost | AUC-ROC | 0.7007 | 0.7831 | **+0.0824 (+8.24%)** |
 | **Skenario E** | Klinis + Semua Gaya Hidup | Random Forest | AUC-ROC | 0.7819 | 0.7678 | *-0.0141 (-1.41%)* |
 
-Berdasarkan matriks perbandingan pada Tabel 3.1 di atas, pemangkasan fitur *noise* melalui seleksi statistik memberikan dua implikasi utama:
+Berdasarkan matriks perbandingan pada Tabel 3.1 di atas serta perbandingan visual antar-model yang disajikan pada **Gambar 3.1**, pemangkasan fitur *noise* melalui seleksi statistik memberikan dua implikasi utama:
 1. **Peningkatan Kinerja pada Skenario Parsial (A, B, C, D)**: Mereduksi jumlah fitur meningkatkan generalisasi model ensemble secara signifikan, terutama pada model berbasis boosting (XGBoost) yang sangat sensitif terhadap variabel redundan. Peningkatan dramatis terlihat pada F1-Score Skenario C (+81.59%) dan AUC-ROC Skenario A (+12.71%). Hal ini menunjukkan batas keputusan (*decision boundary*) yang dibentuk model menjadi lebih kokoh tanpa pengaruh variabel pengganggu.
-2. **Efisiensi Komputasi pada Skenario Komprehensif (E)**: Meskipun Skenario E mengalami sedikit penurunan nilai AUC-ROC sebesar 1.41% pada model Random Forest, model yang dihasilkan menjadi jauh lebih ringkas (*parsimonious*). Hal ini mempercepat waktu pelatihan (*training time*), mengurangi konsumsi memori saat di-deploy di web app, serta menyederhanakan jumlah pertanyaan kuis sehingga meningkatkan kenyamanan pengisian (*user experience*) tanpa mengorbankan performa klasifikasi secara signifikan.
+2. **Efisiensi Komputasi pada Skenario Komprehensif (E)**: Meskipun Skenario E mengalami sedikit penurunan nilai AUC-ROC sebesar 1.41% pada model Random Forest, model yang dihasilkan menjadi jauh lebih ringkas (*parsimonious*). Hal ini mempercepat waktu pelatihan (*training time*), mengurangi konsumsi memori saat di-deploy di web app, serta menyederhanakan jumlah pertanyaan kuis sehingga meningkatkan kenyamanan pengisian (*user experience*) tanpa mengorbankan performa klasifikasi secara signifikan. Peta intensitas nilai kinerja model secara keseluruhan untuk semua skenario juga divisualisasikan dalam bentuk matriks heatmap pada **Gambar 3.2**.
 
 ![Gambar 3.1: Perbandingan AUC-ROC antar Skenario dan Model](reports/feature_selection/figures/auc_comparison.png)
 *Gambar 3.1: Perbandingan AUC-ROC antar Skenario dan Model Klasifikasi (Sesudah Feature Selection).*
@@ -126,7 +126,7 @@ Berdasarkan matriks perbandingan pada Tabel 3.1 di atas, pemangkasan fitur *nois
 #### 3.2 Pemilihan Model Terbaik & Penalaan Threshold
 Pada skenario gabungan seluruh gaya hidup (Skenario E) dengan 24 fitur, model **Random Forest** mencatatkan kinerja terbaik dengan nilai **AUC-ROC = 0.7678** (mengungguli XGBoost sebesar 0.7286 dan Decision Tree sebesar 0.6624 pada skenario yang sama). 
 
-Penerapan threshold keputusan tuned **`0.2344`** memberikan dampak yang sangat krusial bagi aplikasi skrining medis ini:
+Penerapan threshold keputusan tuned **`0.2344`** memberikan dampak yang sangat krusial bagi aplikasi skrining medis ini, dengan visualisasi kurva karakteristik keputusan (ROC Curve) pada Skenario E yang disajikan pada **Gambar 3.3**:
 *   **Recall (Sensitivitas)** meningkat drastis dari **17.14%** (pada threshold bawaan 0.50) menjadi **77.14%** (pada threshold optimal). Kenaikan sensitivitas sebesar 4.5 kali lipat ini memastikan model berhasil mendeteksi sebagian besar penderita stroke aktual di data uji.
 *   **Akurasi** mengalami penurunan dari 90.57% menjadi **70.73%**. Ini merupakan konsekuensi logis (*trade-off*) dari klasifikasi yang lebih sensitif, di mana model lebih waspada dan memprediksi lebih banyak status positif demi keselamatan pasien.
 *   **Precision** terjaga stabil pada angka **8.52%**, meningkat lebih dari 2.3 kali lipat dibandingkan dengan probabilitas acak pada populasi umum (~3.6%).
@@ -148,11 +148,13 @@ KINERJA RANDOM FOREST SKENARIO E (24 FITUR)
 ```
 
 #### 3.3 Analisis SHAP Global & Pengaruh Kelompok Fitur
-Berdasarkan pengujian nilai SHAP global pada model Random Forest Skenario E, tingkat signifikansi kelompok fitur diurutkan sebagai berikut:
-1.  **Kelompok Klinis (Mean SHAP: 0.3204)**: Usia (`age`) mendominasi sebagai fitur terpenting, disusul oleh riwayat hipertensi (`hypertension`). Pada beeswarm plot, titik merah (usia tua dan adanya riwayat hipertensi) berkumpul di sisi kanan (SHAP > 0), secara konsisten meningkatkan prediksi risiko stroke.
+Berdasarkan pengujian nilai SHAP global pada model Random Forest Skenario E, tingkat kepentingan absolut dari masing-masing 20 fitur utama secara global disajikan pada **Gambar 3.4**. Sementara itu, tingkat signifikansi dan arah pengaruh kelompok fitur tersebut diurutkan sebagai berikut:
+1.  **Kelompok Klinis (Mean SHAP: 0.3204)**: Usia (`age`) mendominasi sebagai fitur terpenting, disusul oleh riwayat hipertensi (`hypertension`). Pada beeswarm plot (**Gambar 3.5**), titik merah (usia tua dan adanya riwayat hipertensi) berkumpul di sisi kanan (SHAP > 0), secara konsisten meningkatkan prediksi risiko stroke.
 2.  **Kelompok Kualitas Tidur (Mean SHAP: 0.0782)**: Menempati urutan kedua. Keluhan henti napas saat tidur (`sleep_apnea`) dan frekuensi mendengkur (`snoring_freq`) tinggi terbukti secara signifikan meningkatkan risiko stroke akibat penurunan saturasi oksigen otak yang berulang (Liu et al., 2022).
 3.  **Kelompok Aktivitas Fisik (Mean SHAP: 0.0728)**: Tidak adanya olahraga berat (`vigorous_leisure`) maupun olahraga sedang (`moderate_leisure`) rutin menempatkan titik data di sisi kanan positif SHAP, menunjukkan bahwa gaya hidup *sedentary* merupakan pemicu peningkatan risiko stroke yang signifikan.
 4.  **Kelompok Stres (Mean SHAP: 0.0409)**: Gejala kehilangan minat (`stress_anhedonia`) dan kelelahan fisik (`stress_fatigue`) PHQ-9 berkontribusi pada peningkatan risiko psikologis, meskipun memiliki dampak terkecil dibanding kelompok lainnya.
+
+Secara kumulatif, perbandingan nilai kontribusi rata-rata dari keempat kelompok besar fitur tersebut disajikan pada **Gambar 3.6**.
 
 ![Gambar 3.4: SHAP Global Feature Importance (Rata-rata Dampak Absolut)](reports/feature_selection/figures/shap_summary_bar.png)
 *Gambar 3.4: SHAP Global Feature Importance (Rata-rata Dampak Absolut pada Output Model).*
@@ -166,7 +168,7 @@ Berdasarkan pengujian nilai SHAP global pada model Random Forest Skenario E, tin
 #### 3.4 Implementasi XAI & Threshold di Web App
 Dalam antarmuka web, model AI ini ditonjolkan secara interaktif pada halaman hasil:
 *   **Bilah Threshold Youden**: Menggambarkan letak probabilitas risiko stroke pengguna pada bar 0-100% dengan penanda garis merah batas risiko optimal di titik **`23.44%`**. Jika probabilitas $\ge 23.44\%$, status akan langsung berubah menjadi "Risiko Tinggi". Pengguna juga disajikan informasi edukatif mengenai alasan penyesuaian threshold statistik ini.
-*   **Bagan Batang Dua Arah SHAP Lokal**: Menampilkan 6 faktor terbesar yang menggeser risiko pengguna. Misalnya, jika pengguna berolahraga rutin dan berpendidikan tinggi, bagan menunjukkan batang hijau yang memanjang ke kiri (contoh: `Olahraga Berat -14.0%` dan `Tingkat Pendidikan -3.5%`). Sebaliknya, jika tensi pengguna tinggi, bagan menampilkan batang merah yang memanjang ke kanan (contoh: `Tekanan Darah Sistolik +3.6%`). Hal ini menerjemahkan model machine learning yang rumit menjadi wawasan kesehatan yang transparan dan dapat dipahami secara langsung oleh pengguna.
+*   **Bagan Batang Dua Arah SHAP Lokal**: Menampilkan 6 faktor terbesar yang menggeser risiko pengguna. Misalnya, jika pengguna berolahraga rutin dan berpendidikan tinggi, bagan menunjukkan batang hijau yang memanjang ke kiri (contoh: `Olahraga Berat -14.0%` dan `Tingkat Pendidikan -3.5%`). Sebaliknya, jika tensi pengguna tinggi, bagan menampilkan batang merah yang memanjang ke kanan (contoh: `Tekanan Darah Sistolik +3.6%`). Hal ini menerjemahkan model machine learning yang rumit menjadi wawasan kesehatan yang transparan dan dapat dipahami secara langsung oleh pengguna sebagaimana ditunjukkan pada contoh antarmuka dashboard hasil di **Gambar 3.7**.
 
 <!-- [PLACEHOLDER GAMBAR: screenshot_dashboard_hasil.png] -->
 *Gambar 3.7: Tangkapan layar antarmuka dashboard hasil website MediTrust yang menampilkan Risk Gauge dengan batas Youden's Threshold (23.44%) dan Horizontal Dual-Direction SHAP Bar Chart secara real-time.*
