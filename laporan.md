@@ -124,28 +124,24 @@ Berdasarkan matriks perbandingan pada Tabel 3.1 di atas serta perbandingan visua
 *Gambar 3.2: Heatmap Matriks AUC-ROC Semua Kombinasi Model dan Skenario (24 Fitur).*
 
 #### 3.2 Pemilihan Model Terbaik & Penalaan Threshold
-Pada skenario gabungan seluruh gaya hidup (Skenario E) dengan 24 fitur, model **Random Forest** mencatatkan kinerja terbaik dengan nilai **AUC-ROC = 0.7678** (mengungguli XGBoost sebesar 0.7286 dan Decision Tree sebesar 0.6624 pada skenario yang sama). 
-
-Penerapan threshold keputusan tuned **`0.2344`** memberikan dampak yang sangat krusial bagi aplikasi skrining medis ini, dengan visualisasi kurva karakteristik keputusan (ROC Curve) pada Skenario E yang disajikan pada **Gambar 3.3**:
-*   **Recall (Sensitivitas)** meningkat drastis dari **17.14%** (pada threshold bawaan 0.50) menjadi **77.14%** (pada threshold optimal). Kenaikan sensitivitas sebesar 4.5 kali lipat ini memastikan model berhasil mendeteksi sebagian besar penderita stroke aktual di data uji.
-*   **Akurasi** mengalami penurunan dari 90.57% menjadi **70.73%**. Ini merupakan konsekuensi logis (*trade-off*) dari klasifikasi yang lebih sensitif, di mana model lebih waspada dan memprediksi lebih banyak status positif demi keselamatan pasien.
-*   **Precision** terjaga stabil pada angka **8.52%**, meningkat lebih dari 2.3 kali lipat dibandingkan dengan probabilitas acak pada populasi umum (~3.6%).
+Pada skenario gabungan seluruh gaya hidup (Skenario E) dengan 24 fitur, model **Random Forest** mencatatkan kinerja terbaik dengan nilai **AUC-ROC = 0.7678** (mengungguli XGBoost sebesar 0.7286 dan Decision Tree sebesar 0.6624 pada skenario yang sama). Penerapan threshold keputusan tuned **`0.2344`** memberikan dampak yang sangat krusial bagi aplikasi skrining medis ini, sebagaimana dirinci pada **Tabel 3.2**. Kurva karakteristik keputusan (ROC Curve) pada Skenario E dapat dilihat pada **Gambar 3.3**:
 
 ![Gambar 3.3: Kurva ROC Model Klasifikasi pada Skenario E](reports/feature_selection/figures/roc_curve_scenario_E.png)
 *Gambar 3.3: Kurva ROC Model Klasifikasi pada Skenario E (AUC-ROC Random Forest = 0.7678).*
 
-```
-KINERJA RANDOM FOREST SKENARIO E (24 FITUR)
-┌──────────────────────┬─────────────────┬─────────────────┐
-│ Metrik Evaluasi      │ Threshold 0.50  │ Threshold 0.2344│
-├──────────────────────┼─────────────────┼─────────────────┤
-│ Akurasi (Accuracy)   │     90.57%      │     70.73%      │
-│ Sensitivitas (Recall)│     17.14%      │     77.14%      │
-│ Presisi (Precision)  │      8.22%      │      8.52%      │
-│ Keseimbangan (F1)    │     11.11%      │     15.34%      │
-│ AUC-ROC              │     0.7678      │     0.7678      │
-└──────────────────────┴─────────────────┴─────────────────┘
-```
+##### Tabel 3.2: Perbandingan Kinerja Model Random Forest Skenario E pada Berbagai Threshold
+| Metrik Evaluasi | Ambang Batas Default (Threshold = 0.50) | Ambang Batas Optimal (Threshold = 0.2344) | Selisih Perubahan |
+| :--- | :---: | :---: | :---: |
+| **Akurasi (Accuracy)** | 90.57% | 70.73% | -19.84% (Menurun) |
+| **Sensitivitas (Recall)** | 17.14% | 77.14% | **+60.00% (Meningkat Masif)** |
+| **Presisi (Precision)** | 8.22% | 8.52% | **+0.30% (Meningkat Tipis)** |
+| **F1-Score (Keseimbangan)** | 11.11% | 15.34% | **+4.23% (Meningkat)** |
+| **AUC-ROC** | 0.7678 | 0.7678 | Tetap (0.00%) |
+
+Berdasarkan **Tabel 3.2**, perubahan threshold keputusan ini melahirkan implikasi klinis yang sangat penting:
+*   **Peningkatan Recall (Sensitivitas)** secara masif sebesar **+60.00%** (dari 17.14% ke **77.14%**) menjamin model dapat mendeteksi sebagian besar penderita stroke aktual secara agresif guna meminimalkan risiko *false negative* (terlewatnya pasien stroke yang memerlukan penanganan preventif).
+*   **Penurunan Akurasi** dari 90.57% menjadi **70.73%** merupakan konsekuensi logis (*trade-off*) dari klasifikasi yang lebih sensitif, di mana model mendeteksi lebih banyak status positif demi keselamatan pasien.
+*   **Presisi** yang stabil pada angka **8.52%** tetap menunjukkan efektivitas model karena nilai ini 2.3 kali lipat lebih tinggi dibandingkan probabilitas acak populasi umum NHANES yang hanya ~3.6%.
 
 #### 3.3 Analisis SHAP Global & Pengaruh Kelompok Fitur
 Berdasarkan pengujian nilai SHAP global pada model Random Forest Skenario E, tingkat kepentingan absolut dari masing-masing 20 fitur utama secara global disajikan pada **Gambar 3.4**. Sementara itu, tingkat signifikansi dan arah pengaruh kelompok fitur tersebut diurutkan sebagai berikut:
