@@ -117,8 +117,8 @@ Berdasarkan matriks perbandingan pada Tabel 3.1 di atas, pemangkasan fitur *nois
 1. **Peningkatan Kinerja pada Skenario Parsial (A, B, C, D)**: Mereduksi jumlah fitur meningkatkan generalisasi model ensemble secara signifikan, terutama pada model berbasis boosting (XGBoost) yang sangat sensitif terhadap variabel redundan. Peningkatan dramatis terlihat pada F1-Score Skenario C (+81.59%) dan AUC-ROC Skenario A (+12.71%). Hal ini menunjukkan batas keputusan (*decision boundary*) yang dibentuk model menjadi lebih kokoh tanpa pengaruh variabel pengganggu.
 2. **Efisiensi Komputasi pada Skenario Komprehensif (E)**: Meskipun Skenario E mengalami sedikit penurunan nilai AUC-ROC sebesar 1.41% pada model Random Forest, model yang dihasilkan menjadi jauh lebih ringkas (*parsimonious*). Hal ini mempercepat waktu pelatihan (*training time*), mengurangi konsumsi memori saat di-deploy di web app, serta menyederhanakan jumlah pertanyaan kuis sehingga meningkatkan kenyamanan pengisian (*user experience*) tanpa mengorbankan performa klasifikasi secara signifikan.
 
-![Gambar 3.1: Perbandingan AUC-ROC Sebelum vs Sesudah Feature Selection](reports/feature_selection/figures/auc_comparison.png)
-*Gambar 3.1: Perbandingan AUC-ROC Sebelum vs Sesudah Feature Selection pada 5 Skenario Eksperimen.*
+![Gambar 3.1: Perbandingan AUC-ROC antar Skenario dan Model](reports/feature_selection/figures/auc_comparison.png)
+*Gambar 3.1: Perbandingan AUC-ROC antar Skenario dan Model Klasifikasi (Sesudah Feature Selection).*
 
 ![Gambar 3.2: Heatmap Matriks AUC-ROC Semua Model dan Skenario](reports/feature_selection/figures/heatmap_auc.png)
 *Gambar 3.2: Heatmap Matriks AUC-ROC Semua Kombinasi Model dan Skenario (24 Fitur).*
