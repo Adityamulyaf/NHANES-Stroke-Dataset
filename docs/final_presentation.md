@@ -37,7 +37,22 @@
 
 ---
 
-## Slide 3: Dataset & Preprocessing
+## Slide 3: Penelitian Terdahulu & Celah Riset
+**[Visual/Desain]**
+- Diagram atau kolom perbandingan 3 penelitian terdahulu beserta batasan/celahnya.
+
+**[Teks di Slide]**
+**Batasan & Celah Riset Sebelumnya**
+- **Shobayo et al. (2023):** Memodelkan data perilaku dengan Random Forest.
+  - *Celah Riset:* Belum mengeksplorasi interpretabilitas lokal (XAI) personal untuk pengguna individu.
+- **Liu et al. (2022):** Menggunakan demografi, pola makan, dan biomarker darah.
+  - *Celah Riset:* Ketergantungan pada biomarker darah membuat sistem kurang praktis untuk skrining mandiri secara instan di rumah.
+- **Huang & Liu (2025):** Validasi model prediktif stroke berbasis database NHANES.
+  - *Celah Riset:* Terbatas pada kode eksperimental di notebook riset, belum ditranslasikan menjadi aplikasi web interaktif ramah pengguna.
+
+---
+
+## Slide 4: Dataset & Preprocessing
 **[Visual/Desain]**
 - Flowchart: Dataset mentah -> Split -> Imputasi -> Standardisasi -> SMOTE.
 - Diagram singkat penggabungan 10 modul NHANES.
@@ -53,7 +68,7 @@
 
 ---
 
-## Slide 4: Feature Selection & Desain Eksperimen
+## Slide 5: Feature Selection & Desain Eksperimen
 **[Visual/Desain]**
 - Tabel kecil perbandingan 31 fitur menjadi 24 fitur.
 - Diagram 5 skenario eksperimen.
@@ -64,12 +79,9 @@
 - Seleksi fitur dilakukan menggunakan:
   - **Chi-Square** untuk fitur kategorikal.
   - **ANOVA F-Test** untuk fitur kontinu.
-- Dari **31 fitur awal**, tersisa **24 fitur signifikan**.
-- Tujuh fitur yang dieliminasi dianggap kurang informatif untuk model akhir.
-- Tiga model diuji:
-  - Decision Tree
-  - Random Forest
-  - XGBoost
+- Dari **31 fitur awal**, tersisa **24 fitur signifikan** ($p < 0.05$).
+- Tujuh fitur noise dieliminasi: jenis kelamin, ras, BMI, status perokok aktif, jam tidur, kerja fisik berat, menit sedentary.
+- Tiga model diuji: Decision Tree, Random Forest, XGBoost.
 - Lima skenario eksperimen:
   - A) Klinis saja
   - B) Klinis + Tidur
@@ -79,7 +91,7 @@
 
 ---
 
-## Slide 5: Hasil Eksperimen & Threshold
+## Slide 6: Hasil Eksperimen & Threshold
 **[Visual/Desain]**
 - Grafik AUC-ROC atau tabel ringkas hasil model.
 - Kurva ROC untuk model terbaik.
@@ -87,17 +99,18 @@
 **[Teks di Slide]**
 **Model Terbaik dan Ambang Keputusan**
 
-- **Model terbaik:** Random Forest pada Skenario E.
+- **Model terbaik:** Random Forest pada Skenario E (24 Fitur).
 - **AUC-ROC:** 0.7678.
-- **Threshold default 0.50** menghasilkan recall yang masih rendah.
-- **Threshold optimal 0.2344** dipilih dengan **Youden's J-Statistic**.
-- Dampak utama:
-  - Recall naik signifikan menjadi **77.14%**
-  - Model lebih aman untuk skrining karena mengurangi risiko *false negative*
+- **Threshold default 0.50** menghasilkan recall yang masih rendah (**24.32%**).
+- **Threshold optimal 0.2315** dipilih dengan **Youden's J-Statistic**.
+- Dampak utama penalaan threshold:
+  - Recall naik signifikan menjadi **75.68%**
+  - Akurasi berada pada tingkat yang dapat diterima (**67.61%**)
+  - Model lebih aman untuk skrining preventif karena meminimalkan risiko *false negative*
 
 ---
 
-## Slide 6: Explainable AI (SHAP)
+## Slide 7: Explainable AI (SHAP)
 **[Visual/Desain]**
 - Bar chart SHAP global.
 - Beeswarm plot SHAP.
@@ -120,7 +133,7 @@
 
 ---
 
-## Slide 7: Aplikasi Web
+## Slide 8: Aplikasi Web
 **[Visual/Desain]**
 - Screenshot dashboard aplikasi.
 - Highlight gauge risiko dan panel penjelasan SHAP lokal.
@@ -131,14 +144,14 @@
 - **Frontend:** Next.js di Vercel.
 - **Backend:** FastAPI di Hugging Face Spaces.
 - Aplikasi menampilkan:
-  - **Risk Gauge** untuk probabilitas risiko stroke
+  - **Risk Gauge** untuk probabilitas risiko stroke (dengan batas Youden's Threshold 23.15%)
   - **Penjelasan SHAP lokal** secara real-time
   - **Rekomendasi** berdasarkan profil pengguna
 - Tujuan utama: membuat hasil model lebih mudah dipahami dan lebih siap digunakan.
 
 ---
 
-## Slide 8: Kesimpulan
+## Slide 9: Kesimpulan
 **[Visual/Desain]**
 - Ringkasan 3 poin utama.
 - Tautan demo dan repository.
@@ -147,8 +160,8 @@
 **Kesimpulan**
 
 1. Integrasi faktor gaya hidup dengan data klinis membantu meningkatkan kualitas prediksi risiko stroke.
-2. Seleksi fitur dan penentuan threshold membuat model lebih efektif untuk skenario skrining.
-3. SHAP membantu mengubah model *black box* menjadi sistem yang lebih transparan dan dapat dijelaskan.
+2. Seleksi fitur statistik (24 fitur) dan penentuan threshold optimal (0.2315) membuat model lebih efektif untuk skenario skrining awal.
+3. SHAP membantu mengubah model *black box* menjadi sistem yang lebih transparan dan dapat dijelaskan secara visual (real-time).
 
 **Live Demo:** [nhanes-stroke-dataset.vercel.app](https://nhanes-stroke-dataset.vercel.app)  
 **Repository:** GitHub proyek NHANES Stroke Dataset
