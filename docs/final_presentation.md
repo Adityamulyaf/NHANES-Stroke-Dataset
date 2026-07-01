@@ -1,6 +1,6 @@
-# Draft Konten Slide Presentasi Akhir (PPT)
+# Draft Konten Slide Presentasi Akhir
 
-**Judul Proyek:** Penerapan Explainable Machine Learning untuk Prediksi Risiko Stroke Berbasis Faktor Gaya Hidup
+**Judul Proyek:** Penerapan Explainable Machine Learning untuk Prediksi Risiko Stroke Berbasis Faktor Gaya Hidup  
 **Dataset:** NHANES 2015-2016
 
 ---
@@ -8,8 +8,8 @@
 ## Slide 1: Cover / Halaman Judul
 **[Visual/Desain]**
 - Logo Universitas Sebelas Maret (UNS).
-- Judul Proyek dengan *font* yang jelas dan tegas.
-- Nama Anggota Kelompok.
+- Judul dibuat besar, tegas, dan bersih.
+- Nama anggota kelompok di bagian bawah.
 
 **[Teks di Slide]**
 **PENERAPAN EXPLAINABLE MACHINE LEARNING UNTUK PREDIKSI RISIKO STROKE BERBASIS FAKTOR GAYA HIDUP**
@@ -20,102 +20,137 @@
 - Nurman Aqil Wicaksono (L0124139)
 
 **Dosen:** Prof. Dr. Wiharto, S.T., M.Kom.
+**Program Studi Informatika, Fakultas Teknologi Informasi dan Sains Data, Universitas Sebelas Maret**
 
 ---
 
-## Slide 2: Latar Belakang & Permasalahan
+## Slide 2: Latar Belakang Masalah
 **[Visual/Desain]**
-- Ikon medis atau representasi otak / jantung.
-- Tiga poin utama dibuat berbentuk *bullet points* dengan ikon di masing-masing poin.
+- Ikon medis atau ilustrasi otak/pembuluh darah.
+- Tiga poin utama ditampilkan singkat dan visual.
 
 **[Teks di Slide]**
-**Mengapa Proyek Ini Penting?**
-1. **Clinical vs Lifestyle:** Deteksi dini seringkali hanya fokus pada riwayat klinis dan mengabaikan faktor keseharian (kualitas tidur, stres, sedentari).
-2. **Class Imbalance:** Pasien stroke jauh lebih sedikit dari pasien sehat (~3.6%), menyebabkan bias mayoritas (Model sering *False Negative*).
-3. **Black Box AI:** Algoritma *machine learning* modern sangat rumit. Dokter dan pengguna butuh alasan rasional dan transparan di balik hasil prediksi.
+**Mengapa Topik Ini Penting?**
+1. **Stroke** merupakan penyebab kematian dan disabilitas jangka panjang yang tinggi, sehingga deteksi dini sangat penting.
+2. **Faktor gaya hidup** seperti kualitas tidur, stres, dan aktivitas fisik sering belum dimanfaatkan optimal dalam skrining risiko.
+3. **Model machine learning** modern dapat akurat, tetapi sering bersifat *black box* sehingga kurang mudah dipercaya pengguna.
 
 ---
 
-## Slide 3: Metodologi & Preprocessing
+## Slide 3: Dataset & Preprocessing
 **[Visual/Desain]**
-- Flowchart singkat alur pemrosesan data (Stratified Split $\rightarrow$ Imputasi $\rightarrow$ Standardisasi $\rightarrow$ SMOTE).
-- Tabel perbandingan jumlah fitur sebelum dan sesudah seleksi.
+- Flowchart: Dataset mentah -> Split -> Imputasi -> Standardisasi -> SMOTE.
+- Diagram singkat penggabungan 10 modul NHANES.
 
 **[Teks di Slide]**
-**Alur Pemrosesan & Optimalisasi Fitur**
+**Alur Pengolahan Data**
 
-- **Dataset:** NHANES (2015-2016).
-- **Seleksi Fitur (Statistik Univariat):**
-  - Uji Chi-Square (Kategorikal) & ANOVA F-Test (Kontinu).
-  - Mengurangi dari **31 Fitur $\rightarrow$ 24 Fitur**.
-  - Mengeliminasi fitur *noise* (contoh: Ras, BMI) tanpa mengurangi informasi krusial.
-- **SMOTE (Oversampling):** Mengatasi *class imbalance* hanya pada *data training* untuk mencegah *data leakage*.
+- **Dataset:** NHANES 2015-2016, digabung dari 10 modul survei berdasarkan `SEQN`.
+- **Split data:** Stratified train-test split 80:20.
+- **Imputasi:** Median untuk numerik, modus untuk kategorikal/biner, dan 0 untuk variabel aktivitas fisik tertentu.
+- **Standardisasi:** `StandardScaler` hanya di-fit pada data training.
+- **SMOTE:** Diterapkan hanya pada data training untuk menangani *class imbalance* dan mencegah *data leakage*.
 
 ---
 
-## Slide 4: Hasil Eksperimen & Penalaan Threshold
+## Slide 4: Feature Selection & Desain Eksperimen
 **[Visual/Desain]**
-- Grafik Batang / Tabel yang menyoroti Random Forest sebagai model terbaik.
-- Kurva ROC Skenario E (AUC-ROC: 0.7678).
+- Tabel kecil perbandingan 31 fitur menjadi 24 fitur.
+- Diagram 5 skenario eksperimen.
 
 **[Teks di Slide]**
-**Performa Model & Ambang Batas Medis**
+**Seleksi Fitur dan Skenario Uji**
 
-- **Model Terbaik:** Random Forest Skenario E (24 Fitur Gabungan: Klinis + Tidur + Aktivitas Fisik + Stres).
+- Seleksi fitur dilakukan menggunakan:
+  - **Chi-Square** untuk fitur kategorikal.
+  - **ANOVA F-Test** untuk fitur kontinu.
+- Dari **31 fitur awal**, tersisa **24 fitur signifikan**.
+- Tujuh fitur yang dieliminasi dianggap kurang informatif untuk model akhir.
+- Tiga model diuji:
+  - Decision Tree
+  - Random Forest
+  - XGBoost
+- Lima skenario eksperimen:
+  - A) Klinis saja
+  - B) Klinis + Tidur
+  - C) Klinis + Stres
+  - D) Klinis + Aktivitas Fisik
+  - E) Klinis + Semua Gaya Hidup
+
+---
+
+## Slide 5: Hasil Eksperimen & Threshold
+**[Visual/Desain]**
+- Grafik AUC-ROC atau tabel ringkas hasil model.
+- Kurva ROC untuk model terbaik.
+
+**[Teks di Slide]**
+**Model Terbaik dan Ambang Keputusan**
+
+- **Model terbaik:** Random Forest pada Skenario E.
 - **AUC-ROC:** 0.7678.
-- **Penalaan Youden's J-Statistic Threshold (0.2344):**
-  - *Threshold default (0.50):* Recall hanya 17.14%.
-  - **Threshold optimal (0.2344): Recall meroket menjadi 77.14%.**
-- *Implikasi:* Model jauh lebih sensitif mendeteksi penderita stroke demi meminimalkan kelalaian penanganan medis (*false negative*).
+- **Threshold default 0.50** menghasilkan recall yang masih rendah.
+- **Threshold optimal 0.2344** dipilih dengan **Youden's J-Statistic**.
+- Dampak utama:
+  - Recall naik signifikan menjadi **77.14%**
+  - Model lebih aman untuk skrining karena mengurangi risiko *false negative*
 
 ---
 
-## Slide 5: Explainable AI (SHAP) & Analisis Global
+## Slide 6: Explainable AI (SHAP)
 **[Visual/Desain]**
-- Gambar/Grafik *SHAP Global Feature Importance* atau *Beeswarm Plot* (Gambar 3.4 / 3.5 dari Laporan Akhir).
+- Bar chart SHAP global.
+- Beeswarm plot SHAP.
 
 **[Teks di Slide]**
-**Membuka "Kotak Hitam" AI dengan SHAP**
+**Interpretasi Model dengan SHAP**
 
-- **SHAP (SHapley Additive exPlanations):** Alokasi kontribusi yang adil untuk setiap fitur berdasarkan teori permainan kooperatif.
-- **Top Faktor Risiko (Global):**
-  1. Usia (*Age*)
-  2. Riwayat Hipertensi (*Hypertension*)
-  3. Keluhan Henti Napas saat Tidur (*Sleep Apnea*)
-  4. Kurang Olahraga / Sedentari (*Moderate/Vigorous Leisure*)
-  5. Stres Psikologis
+- **SHAP** digunakan untuk menjelaskan kontribusi setiap fitur terhadap prediksi.
+- Kelompok fitur paling dominan:
+  1. **Klinis**
+  2. **Kualitas Tidur**
+  3. **Aktivitas Fisik**
+  4. **Stres**
+- Fitur penting yang sering muncul:
+  - Usia
+  - Hipertensi
+  - Sleep apnea
+  - Riwayat merokok
+  - Aktivitas fisik rendah
 
 ---
 
-## Slide 6: Demo Web App & SHAP Lokal
+## Slide 7: Aplikasi Web
 **[Visual/Desain]**
-- *Screenshot* Dashboard Hasil dari Aplikasi MediTrust (menampilkan *Risk Gauge* dan *Dual-Direction SHAP Bar Chart* dari Gambar 3.7 & 3.8 laporan akhir).
+- Screenshot dashboard aplikasi.
+- Highlight gauge risiko dan panel penjelasan SHAP lokal.
 
 **[Teks di Slide]**
-**Implementasi Sistem & Antarmuka Interaktif**
+**Implementasi Sistem Interaktif**
 
-- **Frontend:** Next.js (Vercel) | **Backend:** FastAPI (Hugging Face).
-- **Risk Gauge:** Probabilitas prediksi dengan indikator batas Youden (23.44%).
-- **Bagan Batang SHAP Dua Arah (Real-Time):**
-  - **Batang Merah:** Mendorong/menaikkan risiko stroke.
-  - **Batang Hijau:** Mengurangi/melindungi dari risiko stroke.
-- *Transparan, Tepercaya, dan Edukatif untuk Pengguna Independen.*
+- **Frontend:** Next.js di Vercel.
+- **Backend:** FastAPI di Hugging Face Spaces.
+- Aplikasi menampilkan:
+  - **Risk Gauge** untuk probabilitas risiko stroke
+  - **Penjelasan SHAP lokal** secara real-time
+  - **Rekomendasi** berdasarkan profil pengguna
+- Tujuan utama: membuat hasil model lebih mudah dipahami dan lebih siap digunakan.
 
 ---
 
-## Slide 7: Kesimpulan
+## Slide 8: Kesimpulan
 **[Visual/Desain]**
-- Ringkasan 3 Poin *Takeaway*.
-- Link Aplikasi / GitHub.
+- Ringkasan 3 poin utama.
+- Tautan demo dan repository.
 
 **[Teks di Slide]**
-**Kesimpulan & Penutup**
+**Kesimpulan**
 
-1. **Holistik:** Integrasi parameter gaya hidup secara kolektif meningkatkan deteksi stroke.
-2. **Sensitif & Akurat:** Optimasi statistik (Seleksi Fitur) & Threshold 0.2344 mengamankan metrik Recall medis.
-3. **Transparan (XAI):** SHAP secara efektif mengubah algoritma "Kotak Hitam" menjadi alasan yang bisa dipahami (*Actionable Advice*).
+1. Integrasi faktor gaya hidup dengan data klinis membantu meningkatkan kualitas prediksi risiko stroke.
+2. Seleksi fitur dan penentuan threshold membuat model lebih efektif untuk skenario skrining.
+3. SHAP membantu mengubah model *black box* menjadi sistem yang lebih transparan dan dapat dijelaskan.
 
-**Live Website:** [nhanes-stroke-dataset.vercel.app](https://nhanes-stroke-dataset.vercel.app)
-**Repository:** Tersedia secara publik di GitHub.
+**Live Demo:** [nhanes-stroke-dataset.vercel.app](https://nhanes-stroke-dataset.vercel.app)  
+**Repository:** GitHub proyek NHANES Stroke Dataset
 
-***TERIMA KASIH - SESI TANYA JAWAB***
+***TERIMA KASIH***
