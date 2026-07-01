@@ -181,7 +181,7 @@
 
 **[Teks di Slide]**
 **Kesimpulan:**
-1. Integrasi faktor gaya hidup bersama data klinis secara kolektif meningkatkan keandalan deteksi dini stroke.
+1. Meskipun model klinis saja (Skenario A) memiliki AUC-ROC tertinggi (0.8232), integrasi faktor gaya hidup (Skenario E) memberikan kontribusi penting dalam mengidentifikasi **risiko preventif yang dapat dimodifikasi** (tidur, stres, olahraga) serta memberikan rekomendasi kesehatan (*actionable advice*) yang transparan bagi pengguna.
 2. Pemangkasan fitur noise (24 fitur) & penalaan Youden's threshold (0.2315) mengamankan sensitivitas (Recall 75.68%) skrining awal.
 3. SHAP secara interaktif menerjemahkan output model yang rumit menjadi alasan medis yang transparan dan dapat ditindaklanjuti oleh individu.
 
