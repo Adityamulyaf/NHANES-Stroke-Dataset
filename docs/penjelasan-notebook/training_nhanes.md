@@ -107,7 +107,55 @@ Secara default, model machine learning memvonis kelas 1 jika probabilitasnya $\g
 
 ---
 
-## 4. Pertanyaan Kritis yang Sering Ditanyakan Dosen Penguji
+## 4. Analisis & Penjelasan Parameter Model (Hyperparameters)
+
+Ketika melatih model di `training_nhanes.ipynb`, kita tidak menggunakan nilai default bawaan library, melainkan menentukan parameter tertentu (*hyperparameters*). Berikut adalah rincian mengapa parameter tersebut digunakan dan mengapa nilainya diatur sekian:
+
+### A. Decision Tree (Pohon Keputusan)
+```python
+DecisionTreeClassifier(max_depth=6, random_state=42, class_weight='balanced')
+```
+1.  **`max_depth=6`** (Kedalaman Maksimum):
+    *   *Kenapa dibatasi 6?* Parameter ini membatasi seberapa banyak tingkat/cabang pertanyaan yang boleh dibuat oleh pohon keputusan. Jika tidak dibatasi (default = `None`), pohon akan terus bercabang hingga sangat detail sampai menghafal data latihan secara spesifik (noise). Ini akan menyebabkan *overfitting* yang parah. Batas 6 dipilih secara empiris sebagai titik optimal (*sweet spot*) antara model yang tidak terlalu sederhana (*underfitting*) dan tidak terlalu rumit (*overfitting*).
+2.  **`random_state=42`** (Seed Pengacak):
+    *   *Kenapa harus 42?* Algoritma ini menggunakan fungsi pengacakan untuk membagi cabang jika ada fitur dengan nilai kebersihan (Gini) yang sama. Menentukan angka `random_state` (bisa angka berapa saja, namun 42 adalah standar industri yang populer) menjamin hasil pembuatan pohon bersifat *reproducible* (dapat direplikasi sama persis setiap kali notebook dijalankan ulang).
+3.  **`class_weight='balanced'`** (Bobot Kelas Seimbang):
+    *   *Kenapa menggunakan 'balanced'?* Karena data stroke sangat tidak seimbang (minoritas). Parameter ini menginstruksikan model untuk menghitung bobot penalti kesalahan secara otomatis berbanding terbalik dengan frekuensi kelas: $w_c = \frac{N_{\text{sampel}}}{N_{\text{kelas}} \times N_c}$. Model akan memberikan pinalti yang jauh lebih berat jika salah memprediksi pasien stroke, memaksa model lebih sensitif terhadap kelas minoritas.
+
+---
+
+### B. Random Forest (Hutan Acak)
+```python
+RandomForestClassifier(n_estimators=200, max_depth=8, random_state=42, class_weight='balanced', n_jobs=-1)
+```
+1.  **`n_estimators=200`** (Jumlah Pohon):
+    *   *Kenapa harus 200 pohon?* Ini adalah jumlah pohon keputusan independen yang akan dibuat di dalam hutan acak. Semakin banyak pohon, prediksi rata-rata akan semakin stabil. Jumlah 200 dipilih karena memberikan performa yang optimal. Menambah pohon di atas 200 hanya akan memperlambat komputasi tanpa memberikan peningkatan performa yang signifikan (grafik performa sudah konvergen/mendatar).
+2.  **`max_depth=8`** (Kedalaman Pohon di Hutan):
+    *   *Kenapa diatur 8 (lebih dalam dari Decision Tree tunggal)?* Karena Random Forest menggabungkan hasil 200 pohon secara paralel (bagging), variansi model sudah tereduksi secara alami. Oleh karena itu, kita bisa melonggarkan kedalaman masing-masing pohon (dari kedalaman 6 menjadi 8) untuk menangkap pola interaksi fitur yang lebih kompleks, tanpa khawatir terjadi overfitting ekstrem.
+3.  **`class_weight='balanced'`**: Sama seperti pada Decision Tree, memberikan penalti kesalahan lebih tinggi pada pendeteksian pasien stroke agar model tidak didominasi kelas mayoritas (sehat).
+4.  **`n_jobs=-1`** (Paralelisasi Prosesor):
+    *   *Kenapa -1?* Parameter ini menginstruksikan Python untuk menggunakan seluruh core prosesor/CPU komputer yang tersedia untuk melatih 200 pohon secara paralel. Ini sangat menghemat waktu training.
+
+---
+
+### C. XGBoost (Extreme Gradient Boosting)
+```python
+XGBClassifier(n_estimators=200, max_depth=6, learning_rate=0.05, random_state=42, eval_metric='logloss', scale_pos_weight=10, verbosity=0)
+```
+1.  **`n_estimators=200`** (Jumlah Iterasi Boosting):
+    *   *Kenapa 200?* Ini adalah jumlah pohon keputusan sekuensial yang akan dibangun berturut-turut untuk mengoreksi kesalahan pohon sebelumnya.
+2.  **`max_depth=6`** (Kedalaman Pohon Boosting):
+    *   *Kenapa 6?* Berbeda dengan Random Forest, boosting membangun pohon secara berurutan untuk mempelajari kesalahan residual. Karena sifat sekuensial ini, kedalaman masing-masing pohon harus dijaga tetap dangkal (biasanya antara 3 sampai 6) agar model tidak terlalu cepat menghafal detail kesalahan kecil (*overfitting*).
+3.  **`learning_rate=0.05`** (Tingkat Pembelajaran / Shrinkage):
+    *   *Kenapa nilainya kecil (0.05)?* Menentukan seberapa besar kontribusi setiap pohon baru untuk mengoreksi model secara keseluruhan. Nilai kecil (0.05) membuat model belajar secara bertahap dan halus. Pembelajaran lambat ini terbukti secara empiris meningkatkan kemampuan generalisasi model pada data baru dan mencegah model tersesat dalam pencarian minimum global pada loss function.
+4.  **`scale_pos_weight=10`** (Bobot Penyeimbang Positif):
+    *   *Kenapa nilainya 10?* Ini adalah parameter penyeimbang kelas khusus XGBoost (sebagai pengganti `class_weight` di sklearn). Angka 10 berarti kesalahan klasifikasi pada kelas positif (stroke) akan diberi bobot 10 kali lebih penting daripada kelas negatif (sehat). Nilai ini diatur berdasarkan rasio ketidakseimbangan kelas awal (antara 1:10 hingga 1:27) untuk mendorong model lebih sensitif mendeteksi kasus stroke.
+5.  **`eval_metric='logloss'`** (Metrik Evaluasi Internal):
+    *   *Kenapa logloss?* Logarithmic loss adalah metrik kerugian yang mengevaluasi performa probabilitas model selama training. Ini menghukum dengan keras prediksi yang salah tetapi memiliki tingkat keyakinan (probabilitas) tinggi, yang mengarahkan model untuk menghasilkan probabilitas prediksi yang lebih akurat.
+
+---
+
+## 5. Pertanyaan Kritis yang Sering Ditanyakan Dosen Penguji
 
 ### Q1: Mengapa Random Forest dipilih sebagai model terbaik proyek, padahal XGBoost secara teori lebih kompleks?
 > **Jawaban Utama:**
