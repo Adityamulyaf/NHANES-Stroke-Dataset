@@ -74,11 +74,72 @@ Kami menyeleksi fitur menggunakan pendekatan statistik univariat dengan ambang b
 
 Uji ini berhasil mengeliminasi **7 fitur noise**, yaitu jenis kelamin (`gender`), ras (`race`), BMI (`bmi`), status perokok aktif (`current_smoker`), durasi tidur (`sleep_hours`), kerja fisik berat (`vigorous_work`), dan menit sedentary (`sedentary_min`). Penyusutan dimensi ini menghasilkan **24 fitur teroptimal** (12 klinis, 4 tidur, 5 stres PHQ-9, 3 aktivitas fisik).
 
-#### 2.3 Eksperimen Model Klasifikasi & Parameter
-Eksperimen membandingkan tiga algoritma dengan pendekatan matematis yang berbeda pada 5 skenario kombinasi fitur:
-1.  **Decision Tree**: Membagi dataset secara rekursif berdasarkan batas *splitting* terbaik (Gini Impurity). Kami menggunakan parameter `max_depth=6` untuk membatasi kompleksitas pohon, `class_weight='balanced'` untuk penyesuaian bobot kelas, dan `random_state=42`.
-2.  **Random Forest**: Algoritma *Ensemble Bagging* yang melatih 200 Decision Tree independen pada subset sampel bootstrap acak. Parameter yang disetel: `n_estimators=200`, `max_depth=8`, `class_weight='balanced'`, dan `n_jobs=-1`.
-3.  **XGBoost (Extreme Gradient Boosting)**: Algoritma *Ensemble Boosting* yang membangun pohon secara sekuensial untuk meminimalkan residual error dari pohon sebelumnya (Chen & Guestrin, 2016). Parameter yang disetel: `n_estimators=200`, `max_depth=6`, `learning_rate=0.05`, `scale_pos_weight=10`, dan `eval_metric='logloss'`.
+#### 2.3 Eksperimen Model Klasifikasi & Parameter `(Direvisi: Teori Algoritma & Pembentukan Pohon)`
+
+> **[CATATAN REVISI]**: Sub-bab ini telah diperbarui untuk menjelaskan secara mendalam algoritma dasar di balik scikit-learn dan XGBoost (CART, Bagging, GBDT), formulasi matematis kriteria split, regularisasi, dan proses pembentukan pohon secara prosedural.
+
+Eksperimen membandingkan tiga algoritma dengan pendekatan matematis dan filosofi pembentukan pohon yang berbeda pada 5 skenario kombinasi fitur. Penjelasan teoretis dan mekanisme pembentukan pohon untuk masing-masing model dirinci sebagai berikut:
+
+##### 1. Decision Tree (Pohon Keputusan CART)
+Pustaka `scikit-learn` secara internal mengimplementasikan versi optimal dari algoritma **CART (Classification and Regression Trees)** untuk kelas `DecisionTreeClassifier`. CART berbeda dengan algoritma pembentuk pohon klasik lainnya seperti ID3 (yang menggunakan *Information Gain* berbasis *Entropy* untuk pembagian multi-arah) atau C4.5 (yang menggunakan *Gain Ratio*). CART berfokus pada pembentukan **pohon keputusan biner (binary tree)** secara rekursif, di mana setiap *internal node* selalu terbagi menjadi tepat dua *child nodes* (kiri dan kanan).
+
+*   **Metrik Splitting (Gini Impurity)**: 
+    CART mengukur tingkat ketidakmurnian kelas pada suatu *node* $t$ menggunakan metrik **Gini Impurity** ($I_G(t)$). Secara matematis dirumuskan sebagai:
+    $$I_G(t) = 1 - \sum_{i=1}^{C} p_i^2$$
+    Di mana $C$ menyatakan jumlah kelas target (dalam kasus ini $C = 2$, yaitu stroke dan tidak stroke) dan $p_i$ menyatakan proporsi (probabilitas) sampel kelas $i$ di dalam node $t$. Nilai Gini Impurity berkisar antara 0 (seluruh sampel dalam node homogen milik satu kelas) hingga 0.5 (sampel terdistribusi merata antar kelas).
+*   **Proses Pembentukan Pohon (Tree Construction)**:
+    Algoritma bekerja secara *greedy* dari *root node*. Pada setiap pembelahan, algoritma mengevaluasi seluruh fitur $X_j$ dan nilai ambang batas $s$ (untuk fitur kontinu) untuk mencari kombinasi split terbaik $(X_j, s)$ yang menghasilkan penurunan impurity ($\Delta I_G$) terbesar:
+    $$\Delta I_G(t, s) = I_G(t) - \left( \frac{N_L}{N} I_G(t_L) + \frac{N_R}{N} I_G(t_R) \right)$$
+    Di mana $N$ adalah jumlah total sampel pada parent node $t$, sedangkan $N_L$ dan $N_R$ berturut-turut adalah jumlah sampel yang dialokasikan ke node anak kiri ($t_L$) dan kanan ($t_R$). Proses pembagian rekursif ini terus berlanjut hingga memenuhi salah satu kriteria henti (*stopping criteria*):
+    - Kedalaman pohon mencapai batas maksimum (`max_depth = 6` untuk membatasi kompleksitas).
+    - Jumlah sampel di node lebih kecil dari batas minimal untuk pemisahan (`min_samples_split`).
+    - Penurunan impurity ($\Delta I_G$) di bawah ambang batas yang ditentukan.
+    
+    Penyesuaian ketidakseimbangan kelas ditangani lewat parameter `class_weight='balanced'` yang secara matematis memberikan bobot invers terhadap frekuensi kelas pada saat menghitung Gini Impurity.
+
+##### 2. Random Forest (Ensemble Bagging)
+`RandomForestClassifier` merupakan metode ensemble berbasis **Bagging (Bootstrap Aggregating)** yang menggunakan ratusan pohon keputusan CART sebagai estimator dasar (*base learners*). Berbeda dengan Decision Tree tunggal yang rentan mengalami *overfitting* (variansi tinggi), Random Forest mengurangi variansi tersebut dengan melatih banyak pohon secara independen dan menggabungkan prediksinya.
+
+*   **Proses Pembentukan Pohon**:
+    1.  **Bootstrap Sampling**: Untuk setiap pohon $k$ dari total $N_E$ pohon (`n_estimators = 200`), algoritma mengambil sampel acak sebanyak $N$ baris dari data training asli dengan pengembalian (*sampling with replacement*). Setiap pohon dilatih pada subset sampel bootstrap yang berbeda, yang secara statistik menyisakan sekitar 36.8% data yang tidak terpilih (disebut *Out-of-Bag* atau OOB).
+    2.  **Feature Subspace Sampling (Random Patches)**: Untuk meningkatkan keragaman antar-pohon, pada saat membangun setiap node di dalam pohon individu, algoritma tidak mengevaluasi seluruh $p$ fitur yang tersedia. Sebaliknya, algoritma hanya memilih subset fitur acak sebanyak $m$ fitur (secara default diatur sebesar $m = \sqrt{p}$).
+    3.  **Pertumbuhan Independen**: Node di-split berdasarkan fitur terbaik di antara $m$ fitur terpilih menggunakan kriteria Gini Impurity CART. Pohon-pohon ditumbuhkan secara maksimal hingga batas kedalaman (`max_depth = 8`). Pengacakan baris (bootstrap) dan pengacakan kolom (fitur) ini memastikan pohon-pohon yang terbentuk tidak berkorelasi satu sama lain (*de-correlated trees*).
+*   **Mekanisme Aggregating (Ensemble Voting)**:
+    Saat melakukan klasifikasi pada data uji baru $x$, sampel tersebut dilewatkan ke seluruh 200 pohon. Prediksi probabilitas akhir dihitung sebagai rata-rata probabilitas kelas positif yang dihasilkan oleh seluruh pohon individu:
+    $$P(y=1|x) = \frac{1}{N_E} \sum_{k=1}^{N_E} P_k(y=1|x)$$
+    Model ini menggunakan parameter `class_weight='balanced'` dan batas kedalaman maksimum `max_depth = 8` untuk mengendalikan bias-variance tradeoff pada model ensemble.
+
+##### 3. XGBoost (Extreme Gradient Boosting)
+`XGBClassifier` mengimplementasikan algoritma **Gradient Boosted Decision Trees (GBDT)** yang dioptimalkan secara ekstrim untuk kecepatan komputasi dan kinerja prediksi. Berbeda dengan Random Forest yang membangun pohon secara paralel dan independen, XGBoost membangun pohon secara **sekuensial (additive training)**, di mana setiap pohon baru dirancang khusus untuk meminimalkan *residual error* (sisa kesalahan prediksi) dari kombinasi pohon-pohon sebelumnya.
+
+*   **Fungsi Objektif dan Regularisasi**:
+    Pada iterasi ke-$t$, prediksi model didefinisikan sebagai $\hat{y}_i^{(t)} = \hat{y}_i^{(t-1)} + f_t(x_i)$, dengan $f_t(x_i)$ adalah fungsi prediksi dari pohon baru. XGBoost meminimalkan fungsi objektif reguler berikut:
+    $$\mathcal{L}^{(t)} = \sum_{i=1}^{n} l(y_i, \hat{y}_i^{(t-1)} + f_t(x_i)) + \Omega(f_t)$$
+    Di mana $l$ menyatakan *loss function* diferensial (menggunakan binary logistic loss atau `logloss` untuk klasifikasi biner). $\Omega(f_t)$ adalah fungsi penalti regularisasi untuk mengontrol kompleksitas pohon agar tidak *overfitting*:
+    $$\Omega(f_t) = \gamma T + \frac{1}{2} \lambda \sum_{j=1}^{T} w_j^2$$
+    Di mana $T$ adalah jumlah *leaf nodes* (daun) pada pohon $f_t$, $w_j$ adalah bobot nilai pada daun ke-$j$, $\gamma$ adalah parameter penalti jumlah daun (berfungsi sebagai *pruning*), dan $\lambda$ adalah parameter regularisasi L2 pada bobot daun.
+*   **Aproksimasi Deret Taylor Orde Kedua**:
+    Untuk mempermudah optimasi fungsi objektif dengan *loss function* umum secara cepat, XGBoost menggunakan **Ekspansi Deret Taylor Orde Kedua** di sekitar prediksi iterasi sebelumnya $\hat{y}_i^{(t-1)}$:
+    $$\mathcal{L}^{(t)} \approx \sum_{i=1}^{n} \left[ l(y_i, \hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \frac{1}{2} h_i f_t^2(x_i) \right] + \Omega(f_t)$$
+    Di mana:
+    - $g_i = \frac{\partial l(y_i, \hat{y}_i^{(t-1)})}{\partial \hat{y}_i^{(t-1)}}$ adalah turunan pertama (*Gradient*) dari loss function.
+    - $h_i = \frac{\partial^2 l(y_i, \hat{y}_i^{(t-1)})}{\partial (\hat{y}_i^{(t-1)})^2}$ adalah turunan kedua (*Hessian*) dari loss function.
+    
+    Setelah membuang bagian konstanta $l(y_i, \hat{y}_i^{(t-1)})$ dan mendefinisikan kelompok sampel pada daun $j$ sebagai $I_j = \{i | q(x_i) = j\}$, objektif disederhanakan menjadi:
+    $$\tilde{\mathcal{L}}^{(t)} = \sum_{j=1}^{T} \left[ \left( \sum_{i \in I_j} g_i \right) w_j + \frac{1}{2} \left( \sum_{i \in I_j} h_i + \lambda \right) w_j^2 \right] + \gamma T$$
+    Dengan menurunkan fungsi terhadap $w_j$ dan menyamakannya dengan nol, kita memperoleh bobot daun optimal $w_j^*$ untuk struktur pohon tertentu:
+    $$w_j^* = -\frac{\sum_{i \in I_j} g_i}{\sum_{i \in I_j} h_i + \lambda}$$
+    Substitusi balik $w_j^*$ ke fungsi objektif menghasilkan nilai kualitas terbaik dari struktur pohon (semakin kecil, semakin optimal struktur pohonnya):
+    $$\tilde{\mathcal{L}}^{(t)}(q) = -\frac{1}{2} \sum_{j=1}^{T} \frac{\left( \sum_{i \in I_j} g_i \right)^2}{\sum_{i \in I_j} h_i + \lambda} + \gamma T$$
+*   **Proses Pembentukan Pohon (Split Finding)**:
+    Alih-akhir mengevaluasi seluruh struktur pohon secara brute-force, XGBoost menggunakan algoritma *greedy* dari akar pohon ke bawah. Skor peningkatan kualitas pemisahan (*Gain*) ketika sebuah node di-split menjadi anak kiri ($I_L$) dan kanan ($I_R$) dirumuskan sebagai:
+    $$\text{Gain} = \frac{1}{2} \left[ \frac{\left( \sum_{i \in I_L} g_i \right)^2}{\sum_{i \in I_L} h_i + \lambda} + \frac{\left( \sum_{i \in I_R} g_i \right)^2}{\sum_{i \in I_R} h_i + \lambda} - \frac{\left( \sum_{i \in I} g_i \right)^2}{\sum_{i \in I} h_i + \lambda} \right] - \gamma$$
+    Jika nilai $\text{Gain}$ lebih kecil dari $\gamma$, maka pemisahan node tidak dilakukan (mekanisme pruning otomatis).
+*   **Sparsity-aware Split Finding**:
+    XGBoost mendeteksi nilai kosong secara otomatis dengan menguji sampel yang memiliki nilai kosong pada fitur terpilih ke cabang kiri dan kanan secara bergantian selama perhitungan split. Algoritma kemudian menetapkan "arah default" yang menghasilkan skor *Gain* tertinggi untuk fitur tersebut.
+
+Dalam eksperimen kami, XGBoost dikonfigurasi dengan parameter `n_estimators=200`, `max_depth=6`, `learning_rate=0.05`, dan `scale_pos_weight=10` untuk memberikan bobot ekstra 10 kali lipat pada kelas minoritas (stroke positif).
+
 
 #### 2.4 Penalaan Threshold & Pustaka SHAP (XAI)
 Untuk mengatasi class imbalance, batas keputusan probabilitas ditala menggunakan indeks **Youden's J-Statistic** pada kurva ROC:
@@ -171,9 +232,11 @@ Dalam antarmuka web, model AI ini ditonjolkan secara interaktif pada halaman has
 
 ---
 
-### 4. Kesimpulan
+### 4. Kesimpulan `(Direvisi: Perbandingan Skenario A vs E)`
 
-Penelitian ini berhasil membuktikan bahwa meskipun model klinis saja memiliki performa klasifikasi global (AUC-ROC) tertinggi, integrasi faktor gaya hidup (kualitas tidur, stres, dan aktivitas fisik) secara kolektif dengan parameter klinis dasar memberikan kontribusi penting dalam mengidentifikasi risiko preventif yang dapat dimodifikasi serta meningkatkan interpretabilitas model prediksi risiko stroke. Penerapan seleksi fitur statistik (Chi-Square & ANOVA F-Test) sukses mereduksi dimensi dari 31 menjadi 24 fitur signifikan, meminimalkan *overfitting*, serta meningkatkan kualitas sampling SMOTE. Model Random Forest Skenario E (24 fitur) menghasilkan kinerja terbaik dengan nilai AUC-ROC sebesar 0.7678. Penalaan ambang batas keputusan optimal Youden's J-Statistic pada 0.2344 terbukti krusial untuk penapisan medis awal dengan meningkatkan Recall model secara masif hingga 77.14%. Terakhir, integrasi visualisasi threshold keputusan dan bagan kontribusi fitur SHAP lokal secara real-time pada web app berhasil menjembatani sifat "kotak hitam" (*black box*) model machine learning menjadi sistem penapisan dini yang transparan, tepercaya, dan edukatif bagi pengguna individu.
+> **[CATATAN REVISI]**: Kalimat pembuka kesimpulan disesuaikan untuk membandingkan trade-off performa global AUC-ROC dari model klinis murni (Skenario A) dengan nilai kontribusi preventif serta rekomendasi kesehatan (*actionable advice*) personal yang transparan pada model integrasi gaya hidup (Skenario E).
+
+Penelitian ini berhasil membuktikan bahwa meskipun model klinis saja (Skenario A) memiliki AUC-ROC tertinggi (0.8232), integrasi faktor gaya hidup (Skenario E) memberikan kontribusi penting dalam mengidentifikasi risiko preventif yang dapat dimodifikasi (tidur, stres, olahraga) serta memberikan rekomendasi kesehatan (*actionable advice*) yang transparan bagi pengguna. Penerapan seleksi fitur statistik (Chi-Square & ANOVA F-Test) sukses mereduksi dimensi dari 31 menjadi 24 fitur signifikan, meminimalkan *overfitting*, serta meningkatkan kualitas sampling SMOTE. Model Random Forest Skenario E (24 fitur) menghasilkan kinerja terbaik dengan nilai AUC-ROC sebesar 0.7678. Penalaan ambang batas keputusan optimal Youden's J-Statistic pada 0.2344 terbukti krusial untuk penapisan medis awal dengan meningkatkan Recall model secara masif hingga 77.14%. Terakhir, integrasi visualisasi threshold keputusan dan bagan kontribusi fitur SHAP lokal secara real-time pada web app berhasil menjembatani sifat "kotak hitam" (*black box*) model machine learning menjadi sistem penapisan dini yang transparan, tepercaya, dan edukatif bagi pengguna individu.
 
 ---
 
